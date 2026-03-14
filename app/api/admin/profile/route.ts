@@ -10,6 +10,7 @@ import {
   getOrganizerProfileSnapshot,
   updateOrganizerProfile
 } from "@/services/organizer";
+import type { Database } from "@/types/database";
 
 export async function GET() {
   try {
@@ -62,11 +63,15 @@ async function getCurrentRole() {
     return null;
   }
 
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", session.user.id)
     .maybeSingle();
+  const profile = profileData as Pick<
+    Database["public"]["Tables"]["profiles"]["Row"],
+    "role"
+  > | null;
 
   return profile?.role ?? null;
 }

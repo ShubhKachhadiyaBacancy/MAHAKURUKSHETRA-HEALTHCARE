@@ -139,39 +139,25 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
   }
 
   const cases = await getCaseList(query);
-  const isDoctor = viewer.role === "doctor";
-  const canCreateCase = viewer.role === "organizer";
 
   return (
     <WorkspaceShell pathname="/patients" viewer={viewer}>
       <PageIntro
         action={
-          canCreateCase ? (
-            <Link href="/intake">
-              <Button>Add patient case</Button>
-            </Link>
-          ) : (
-            <div className="rounded-2xl border border-slate-200 px-4 py-3 text-xs text-slate-600">
-              {isDoctor
-                ? "Open an assigned patient to review details and send feedback."
-                : "Ask your organizer to create cases or grant broader permissions."}
-            </div>
-          )
+          <div className="rounded-2xl border border-slate-200 px-4 py-3 text-xs text-slate-600">
+            Open an assigned patient to review details and send feedback.
+          </div>
         }
-        description={
-          isDoctor
-            ? "This doctor queue is limited to patients assigned to you. Open any case to review the timeline and send feedback to the access team."
-            : "Track the cases that matter now. This queue emphasizes next action, affordability state, payer progress, and ownership instead of only listing names."
-        }
-        eyebrow={isDoctor ? "Assigned patients" : "Case queue"}
-        title={isDoctor ? "Doctor patient queue" : "Patient access cases"}
+        description="This doctor queue is limited to patients assigned to you. Open any case to review the timeline and send feedback to the access team."
+        eyebrow="Assigned patients"
+        title="Doctor patient queue"
       />
 
       <form className="max-w-md" method="get">
         <Input
           defaultValue={query}
           name="q"
-          placeholder={isDoctor ? "Search assigned patient, therapy, or payer" : "Search patient, therapy, or payer"}
+          placeholder="Search assigned patient, therapy, or payer"
         />
       </form>
 

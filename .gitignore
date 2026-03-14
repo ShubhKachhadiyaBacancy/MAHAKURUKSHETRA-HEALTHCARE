@@ -1,0 +1,15 @@
+.next
+.next-dev
+.next-dev-*
+.next-dev*.log
+node_modules
+.env.local
+.env
+.vercel
+coverage
+tsconfig.tsbuildinfo
+~$*.docx
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

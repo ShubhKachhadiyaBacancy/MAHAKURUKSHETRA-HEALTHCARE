@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function ClaimsPage() {
   const viewer = await requireViewerContext();
 
-  if (viewer.role !== "patient") {
+  if (viewer.role !== "patients") {
     return (
       <WorkspaceShell pathname="/claims" viewer={viewer}>
         <PageIntro

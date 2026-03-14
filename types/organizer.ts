@@ -115,15 +115,38 @@ export type OrganizerMedicationsSnapshot = {
 export type OrganizerOfficeRecord = {
   id: string;
   name: string;
-  providerCount: number;
-  specialties: string[];
-  contacts: string[];
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  phone: string | null;
+  email: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type OrganizerOfficesSnapshot = {
-  mode: "derived";
+  mode: "managed";
   note: string;
   rows: OrganizerOfficeRecord[];
+};
+
+export type OrganizerOfficePayload = {
+  name: string;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  phone: string | null;
+  email: string | null;
+};
+
+export type OrganizerOfficeDetail = OrganizerOfficePayload & {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type OrganizerReportsSnapshot = {

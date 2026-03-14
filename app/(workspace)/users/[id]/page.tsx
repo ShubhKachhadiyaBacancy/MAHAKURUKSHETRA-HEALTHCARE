@@ -17,6 +17,19 @@ type UserDetailPageProps = {
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
   const viewer = await requireViewerContext();
   const { id } = await params;
+
+  if (viewer.role !== "admin") {
+    return (
+      <WorkspaceShell pathname="/users" viewer={viewer}>
+        <PageIntro
+          description="User administration is reserved for admins."
+          eyebrow="Users"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
   const user = await getAdminUserDetail(id);
 
   return (
@@ -29,7 +42,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
             redirectTo="/users"
           />
         }
-        description="Update profile details, role assignment, and any linked provider metadata."
+        description="Update profile details, role assignment, and any linked doctor metadata."
         eyebrow="Users"
         title={user.fullName}
       />
@@ -42,10 +55,10 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
           <div className="text-sm text-slate-700 dark:text-slate-300">
             <div>Created: {user.createdAt}</div>
             <div className="mt-2">
-              Provider record: {user.linkedProvider ? "Available" : "Not linked"}
+              Doctor record: {user.linkedProvider ? "Available" : "Not linked"}
             </div>
             <div className="mt-2">
-              Case manager record: {user.linkedCaseManager ? "Available" : "Not linked"}
+              Organizer record: {user.linkedCaseManager ? "Available" : "Not linked"}
             </div>
             <div className="mt-2">
               Patient record: {user.linkedPatient ? "Available" : "Not linked"}

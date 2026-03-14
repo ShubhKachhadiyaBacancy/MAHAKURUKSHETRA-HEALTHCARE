@@ -55,7 +55,7 @@ export function OrganizerProfileForm({ snapshot }: OrganizerProfileFormProps) {
     <div className="grid gap-6 xl:grid-cols-[0.9fr_minmax(0,1.1fr)]">
       <Card className="space-y-5 p-6">
         <div>
-          <span className="eyebrow">Admin identity</span>
+          <span className="eyebrow">Account identity</span>
           <h2 className="mt-2 font-display text-3xl tracking-tight text-slate-950 dark:text-white">
             Profile overview
           </h2>
@@ -67,7 +67,7 @@ export function OrganizerProfileForm({ snapshot }: OrganizerProfileFormProps) {
               Organization
             </div>
             <div className="mt-1 text-base font-medium text-slate-950 dark:text-white">
-              {snapshot.organizationName}
+              {snapshot.organizationName || "Not assigned"}
             </div>
           </div>
           <div>
@@ -93,7 +93,7 @@ export function OrganizerProfileForm({ snapshot }: OrganizerProfileFormProps) {
         <div>
           <span className="eyebrow">Edit profile</span>
           <h2 className="mt-2 font-display text-3xl tracking-tight text-slate-950 dark:text-white">
-            Keep admin details current
+            Keep profile details current
           </h2>
         </div>
 

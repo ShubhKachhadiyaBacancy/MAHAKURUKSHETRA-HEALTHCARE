@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
   OrganizerServiceError,
+  createOrganizerOffice,
   getOrganizerOfficesSnapshot
 } from "@/services/organizer";
 
@@ -13,14 +14,14 @@ export async function GET() {
   }
 }
 
-export async function POST() {
-  return NextResponse.json(
-    {
-      message:
-        "Office writes are unavailable because the current schema does not contain an offices table."
-    },
-    { status: 409 }
-  );
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const result = await createOrganizerOffice(body ?? {});
+    return NextResponse.json(result);
+  } catch (error) {
+    return toErrorResponse(error);
+  }
 }
 
 function toErrorResponse(error: unknown) {

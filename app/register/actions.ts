@@ -30,7 +30,7 @@ export async function registerAction(
   const password = String(formData.get("password") ?? "").trim();
   const organizationName = String(formData.get("organizationName") ?? "").trim();
   const phone = readOptionalValue(formData, "phone");
-  const selectedRole = "admin";
+  const selectedRole = "organizer";
 
   if (!fullName || !email || !password || !organizationName) {
     return {

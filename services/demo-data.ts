@@ -9,8 +9,8 @@ import type {
 
 export const demoViewer: ViewerContext = {
   displayName: "Maya Chen",
-  role: "case_manager",
-  roleLabel: "Case manager",
+  role: "organizer",
+  roleLabel: "Organizer",
   organizationName: "Northstar Specialty Care",
   mode: "demo",
   hasSession: false
@@ -372,7 +372,7 @@ export const demoSettings: SettingsSnapshot = {
   specialtyProgram: "Immunology high-touch workflow",
   notificationChannels: ["Email digest", "Critical SMS alerts", "In-app notifications"],
   dailyDigest: "Weekdays at 7:30 AM",
-  escalationRule: "Critical blockers escalate to case manager after 4 business hours"
+  escalationRule: "Critical blockers escalate to the organizer after 4 business hours"
 };
 
 export const helpTopics = [

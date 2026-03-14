@@ -25,7 +25,7 @@ create table if not exists public.profiles (
   email text,
   phone text,
   title text,
-  role text not null default 'staff' check (role in ('admin', 'provider', 'case_manager', 'staff')),
+  role text not null default 'organizer' check (role in ('admin', 'organizer', 'patients', 'doctor')),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -68,6 +68,7 @@ create table if not exists public.case_managers (
 create table if not exists public.patients (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
+  profile_id uuid unique references public.profiles(id) on delete set null,
   first_name text not null,
   last_name text not null,
   date_of_birth date,
@@ -172,6 +173,22 @@ create table if not exists public.patient_cases (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+create table if not exists public.claims (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  patient_id uuid not null references public.patients(id) on delete cascade,
+  case_id uuid references public.patient_cases(id) on delete set null,
+  claim_number text not null,
+  claim_type text not null default 'medical' check (claim_type in ('medical', 'pharmacy', 'reimbursement', 'support')),
+  status text not null default 'draft' check (status in ('draft', 'submitted', 'in_review', 'approved', 'partially_approved', 'denied', 'paid')),
+  payer_name text,
+  service_date date,
+  amount numeric(12, 2),
+  note text,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
 create table if not exists public.prior_authorizations (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
@@ -264,10 +281,13 @@ create unique index if not exists medications_name_uidx
 
 create index if not exists profiles_org_idx on public.profiles (organization_id);
 create index if not exists case_managers_org_idx on public.case_managers (organization_id, active);
+create index if not exists patients_profile_idx on public.patients (profile_id);
 create index if not exists patients_org_name_idx on public.patients (organization_id, last_name, first_name);
 create index if not exists prescriptions_org_idx on public.prescriptions (organization_id, patient_id);
 create index if not exists insurance_org_patient_idx on public.insurance_policies (organization_id, patient_id, status);
 create index if not exists patient_cases_queue_idx on public.patient_cases (organization_id, status, priority, last_activity_at desc);
+create unique index if not exists claims_org_claim_number_uidx on public.claims (organization_id, claim_number);
+create index if not exists claims_patient_idx on public.claims (patient_id, created_at desc);
 create index if not exists prior_auth_case_idx on public.prior_authorizations (organization_id, case_id, status);
 create index if not exists financial_case_idx on public.financial_assistance_cases (organization_id, case_id, status);
 create index if not exists notifications_unread_idx on public.notifications (organization_id, read_at, priority);
@@ -320,6 +340,11 @@ create trigger patient_cases_touch_updated_at
 before update on public.patient_cases
 for each row execute function public.touch_updated_at();
 
+drop trigger if exists claims_touch_updated_at on public.claims;
+create trigger claims_touch_updated_at
+before update on public.claims
+for each row execute function public.touch_updated_at();
+
 drop trigger if exists prior_authorizations_touch_updated_at on public.prior_authorizations;
 create trigger prior_authorizations_touch_updated_at
 before update on public.prior_authorizations
@@ -344,6 +369,7 @@ alter table public.medications enable row level security;
 alter table public.prescriptions enable row level security;
 alter table public.insurance_policies enable row level security;
 alter table public.patient_cases enable row level security;
+alter table public.claims enable row level security;
 alter table public.prior_authorizations enable row level security;
 alter table public.financial_assistance_cases enable row level security;
 alter table public.documents enable row level security;
@@ -491,6 +517,31 @@ create policy patient_cases_update on public.patient_cases
 for update to authenticated
 using (public.is_org_member(organization_id))
 with check (public.is_org_member(organization_id));
+
+drop policy if exists claims_select on public.claims;
+create policy claims_select
+on public.claims
+for select
+using (public.is_org_member(organization_id));
+
+drop policy if exists claims_insert on public.claims;
+create policy claims_insert
+on public.claims
+for insert
+with check (public.is_org_member(organization_id));
+
+drop policy if exists claims_update on public.claims;
+create policy claims_update
+on public.claims
+for update
+using (public.is_org_member(organization_id))
+with check (public.is_org_member(organization_id));
+
+drop policy if exists claims_delete on public.claims;
+create policy claims_delete
+on public.claims
+for delete
+using (public.is_org_member(organization_id));
 
 drop policy if exists prior_authorizations_select on public.prior_authorizations;
 create policy prior_authorizations_select on public.prior_authorizations

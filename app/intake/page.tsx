@@ -16,7 +16,7 @@ export default async function IntakePage() {
       <PageIntro
         eyebrow="Patient registration"
         title="Register patients inside the workspace"
-        description="Authenticated admins, providers, and case managers add new patients, prescriptions, and cases without leaving their workspace."
+        description="Authenticated admins and organizers add new patients, prescriptions, and cases without leaving their workspace."
         action={
           <Link href="/patients">
             <Button variant="secondary">Open patient queue</Button>

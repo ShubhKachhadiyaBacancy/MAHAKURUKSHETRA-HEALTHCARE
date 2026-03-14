@@ -30,12 +30,12 @@ export const getViewerContext = cache(async (): Promise<ViewerContext> => {
       .maybeSingle();
 
     const rawRole = profile?.role ?? "";
-    const role = isRegisterRole(rawRole) ? rawRole : "staff";
+    const role = isRegisterRole(rawRole) ? rawRole : "organizer";
     let organizationId = profile?.organization_id ?? null;
     let organizationName = "SpecialtyRx Organization";
     let mode: ViewerContext["mode"] = "demo";
 
-    if (!organizationId && role === "patient") {
+    if (!organizationId && role === "patients") {
       const { data: patient } = await db
         .from("patients")
         .select("organization_id")

@@ -19,7 +19,7 @@ export async function getDashboardSnapshot(): Promise<ProviderDashboardData> {
       return demoDashboard;
     }
 
-    const isDoctor = actor.role === "provider";
+    const isDoctor = actor.role === "doctor";
     if (isDoctor && !actor.provider?.id) {
       return createEmptyDoctorDashboard();
     }
@@ -171,7 +171,7 @@ export async function getDashboardSnapshot(): Promise<ProviderDashboardData> {
               }))
     };
   } catch {
-    return actor?.role === "provider" ? createEmptyDoctorDashboard() : demoDashboard;
+    return actor?.role === "doctor" ? createEmptyDoctorDashboard() : demoDashboard;
   }
 }
 

@@ -18,6 +18,19 @@ export default async function MedicationDetailPage({
 }: MedicationDetailPageProps) {
   const viewer = await requireViewerContext();
   const { id } = await params;
+
+  if (viewer.role !== "admin") {
+    return (
+      <WorkspaceShell pathname="/medications" viewer={viewer}>
+        <PageIntro
+          description="Medication editing is reserved for admins."
+          eyebrow="Medications"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
   const medication = await getMedicationDetail(id);
 
   return (

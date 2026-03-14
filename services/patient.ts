@@ -370,7 +370,7 @@ async function requirePatientWorkspaceContext(): Promise<PatientWorkspaceContext
     throw new PatientServiceError(403, "Unable to resolve your profile.");
   }
 
-  if (profile.role !== "patient") {
+  if (profile.role !== "patients") {
     throw new PatientServiceError(403, "Patient workspace access is required.");
   }
 

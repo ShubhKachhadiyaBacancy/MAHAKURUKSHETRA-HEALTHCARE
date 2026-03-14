@@ -15,11 +15,11 @@ export default async function NewOrganizerPatientPage() {
         title="Create patient"
       />
 
-      {viewer.role === "admin" ? (
+      {viewer.role === "organizer" ? (
         <OrganizerPatientForm mode="create" />
       ) : (
         <Card className="p-6 text-sm text-slate-600 dark:text-slate-300">
-          Organizer patient creation is only available to organization administrators.
+          Organizer patient creation is only available to organizers.
         </Card>
       )}
     </WorkspaceShell>

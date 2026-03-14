@@ -1,41 +1,73 @@
 :root {
   color-scheme: light;
-  --bg-page: #f4f1eb;
-  --bg-panel: rgba(255, 255, 255, 0.76);
-  --bg-panel-muted: rgba(247, 242, 235, 0.7);
-  --bg-soft: #ebe4d8;
-  --text-primary: #14212c;
-  --text-secondary: #4a5a67;
-  --text-muted: #6d7b87;
-  --line: rgba(20, 33, 44, 0.12);
-  --line-strong: rgba(20, 33, 44, 0.2);
-  --focus-ring: rgba(13, 118, 108, 0.18);
-  --shadow-panel: 0 30px 80px rgba(15, 23, 42, 0.09), 0 12px 32px rgba(15, 23, 42, 0.05);
-  --accent: #0d766c;
-  --accent-strong: #0a5d57;
-  --accent-soft: rgba(13, 118, 108, 0.14);
-  --accent-warm: #c46a40;
-  --hero-grid: linear-gradient(to right, rgba(20, 33, 44, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(20, 33, 44, 0.06) 1px, transparent 1px);
+  --bg-page: #eff3ef;
+  --bg-panel: rgba(252, 255, 251, 0.84);
+  --bg-panel-muted: #f4f8f4;
+  --bg-soft: #e5ece7;
+  --text-primary: #102231;
+  --text-secondary: #536473;
+  --text-muted: #7d8b98;
+  --line: rgba(16, 34, 49, 0.11);
+  --line-strong: rgba(16, 34, 49, 0.22);
+  --focus-ring: rgba(31, 107, 114, 0.18);
+  --shadow-panel: 0 26px 70px rgba(16, 34, 49, 0.08);
+  --shadow-strong: 0 38px 110px rgba(16, 34, 49, 0.12);
+  --accent: #1f6b72;
+  --accent-strong: #123e47;
+  --accent-soft: rgba(31, 107, 114, 0.12);
+  --accent-warm: #b98247;
+  --hero-grid: linear-gradient(to right, rgba(16, 34, 49, 0.032) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 34, 49, 0.032) 1px, transparent 1px);
+  --sidebar-bg: linear-gradient(180deg, rgba(252, 255, 253, 0.97), rgba(237, 243, 238, 0.98));
+  --sidebar-panel: rgba(255, 255, 255, 0.72);
+  --sidebar-panel-strong: rgba(246, 249, 247, 0.92);
+  --sidebar-panel-hover: rgba(241, 246, 243, 0.96);
+  --sidebar-panel-active: rgba(223, 236, 232, 0.96);
+  --sidebar-backdrop: radial-gradient(circle, rgba(31, 107, 114, 0.18), transparent 68%);
+  --sidebar-shadow: 0 28px 72px rgba(16, 34, 49, 0.12);
+  --sidebar-line: rgba(16, 34, 49, 0.12);
+  --sidebar-text: #102231;
+  --sidebar-muted: rgba(83, 100, 115, 0.82);
+  --sidebar-chip: rgba(126, 214, 205, 0.14);
+  --sidebar-icon-bg: rgba(31, 107, 114, 0.12);
+  --sidebar-icon-text: #1f6b72;
+  --sidebar-badge-bg: rgba(16, 34, 49, 0.04);
+  --sidebar-badge-text: #102231;
 }
 
 :root.dark {
   color-scheme: dark;
-  --bg-page: #071118;
-  --bg-panel: rgba(7, 17, 24, 0.82);
-  --bg-panel-muted: rgba(9, 22, 31, 0.78);
-  --bg-soft: #0a1720;
-  --text-primary: #eff6fb;
-  --text-secondary: #b7c7d5;
-  --text-muted: #8ea1b0;
-  --line: rgba(122, 160, 184, 0.16);
-  --line-strong: rgba(122, 160, 184, 0.28);
-  --focus-ring: rgba(121, 199, 189, 0.28);
-  --shadow-panel: 0 32px 82px rgba(0, 3, 9, 0.78), 0 14px 30px rgba(0, 4, 10, 0.62);
-  --accent: #79c7bd;
-  --accent-strong: #a6e2db;
-  --accent-soft: rgba(121, 199, 189, 0.18);
-  --accent-warm: #f0ad7d;
-  --hero-grid: linear-gradient(to right, rgba(166, 226, 219, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(166, 226, 219, 0.08) 1px, transparent 1px);
+  --bg-page: #08131a;
+  --bg-panel: rgba(11, 24, 32, 0.9);
+  --bg-panel-muted: #0e1b24;
+  --bg-soft: #0c161f;
+  --text-primary: #edf7f7;
+  --text-secondary: #b1c4c7;
+  --text-muted: #73888d;
+  --line: rgba(237, 247, 247, 0.09);
+  --line-strong: rgba(237, 247, 247, 0.18);
+  --focus-ring: rgba(104, 204, 195, 0.22);
+  --shadow-panel: 0 26px 70px rgba(0, 0, 0, 0.34);
+  --shadow-strong: 0 42px 120px rgba(0, 0, 0, 0.46);
+  --accent: #69c1bc;
+  --accent-strong: #d6f0ee;
+  --accent-soft: rgba(105, 193, 188, 0.16);
+  --accent-warm: #e0ad72;
+  --hero-grid: linear-gradient(to right, rgba(237, 247, 247, 0.042) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(237, 247, 247, 0.042) 1px, transparent 1px);
+  --sidebar-bg: linear-gradient(180deg, rgba(7, 16, 22, 0.98), rgba(5, 11, 16, 0.99));
+  --sidebar-panel: rgba(255, 255, 255, 0.03);
+  --sidebar-panel-strong: rgba(14, 24, 34, 0.9);
+  --sidebar-panel-hover: rgba(20, 31, 43, 0.95);
+  --sidebar-panel-active: rgba(25, 42, 62, 0.9);
+  --sidebar-backdrop: radial-gradient(circle, rgba(105, 193, 188, 0.22), transparent 68%);
+  --sidebar-shadow: 0 34px 90px rgba(5, 8, 15, 0.3);
+  --sidebar-line: rgba(214, 240, 238, 0.12);
+  --sidebar-text: #edf7f7;
+  --sidebar-muted: rgba(190, 212, 212, 0.68);
+  --sidebar-chip: rgba(105, 193, 188, 0.16);
+  --sidebar-icon-bg: rgba(255, 255, 255, 0.06);
+  --sidebar-icon-text: #dce8ff;
+  --sidebar-badge-bg: rgba(255, 255, 255, 0.08);
+  --sidebar-badge-text: #dce8ff;
 }

@@ -1,14 +1,14 @@
 ## Default Workspace Accounts
 
-Use the `/register` page or the Supabase Admin API to create the following seed users (a `profile` row and workspace queue already exist in `supabase/seed.sql` for their roles). These credentials are just for local/dev use and rely on the service role getting the matching organization and role data.
+These credentials are for local/dev use and rely on the service role seeding the matching organization and role data. The `/register` page only creates organizers; use the Supabase Admin API or `supabase/seed.sql` for the other roles.
 
-| Role         | Email                         | Password       | Notes |
-|--------------|-------------------------------|----------------|-------|
-| Administrator| `admin@northstar.test`        | `AdminPass1!`  | Creates organization shell + dashboards. |
-| Provider     | `provider@northstar.test`     | `Provider2!`   | Attach practice and specialty when registering. |
-| Case manager | `case.manager@northstar.test` | `CaseMgr3!`    | Seeds outreach queue entries. |
-| Staff        | `staff@northstar.test`        | `StaffOps4!`   | General workspace collaborator. |
+| Role      | Email                     | Password        | Notes |
+|-----------|---------------------------|-----------------|-------|
+| ADMIN     | `admin1@northstar.test`   | `admin123`      | Creates organization shell + dashboards. |
+| ORGANIZER | `org1@northstar.test`     | `org123`        | Maps to the organizer case manager seed. |
+| PATIENTS  | `patient1@northstar.test` | `patient123`    | Maps to the seeded patient record. |
+| DOCTOR    | `doctor1@northstar.test`  | `doctor123`     | Maps to the seeded provider record. |
 
-Run the register form for each role (fill required fields) or call `serviceClient.auth.admin.createUser` with these emails/passwords plus `user_metadata.role` to match.
+Run the register form for the organizer (fill required fields) or call `serviceClient.auth.admin.createUser` with these emails/passwords plus `user_metadata.role` to match (`admin`, `organizer`, `patients`, `doctor` respectively).
 
 For a ready-to-read summary that mirrors `supabase/seed.sql`, see [`SEED_CREDENTIALS.md`](./SEED_CREDENTIALS.md).

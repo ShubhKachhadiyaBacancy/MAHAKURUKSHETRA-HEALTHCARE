@@ -17,7 +17,7 @@ export async function getReportsSnapshot(): Promise<ReportsSnapshot> {
       return demoReports;
     }
 
-    const isDoctor = actor.role === "provider";
+    const isDoctor = actor.role === "doctor";
     if (isDoctor && !actor.provider?.id) {
       return createEmptyDoctorReports();
     }
@@ -96,7 +96,7 @@ export async function getReportsSnapshot(): Promise<ReportsSnapshot> {
       rows: rows.length > 0 ? rows : isDoctor ? [] : demoReports.rows
     };
   } catch {
-    return actor?.role === "provider" ? createEmptyDoctorReports() : demoReports;
+    return actor?.role === "doctor" ? createEmptyDoctorReports() : demoReports;
   }
 }
 

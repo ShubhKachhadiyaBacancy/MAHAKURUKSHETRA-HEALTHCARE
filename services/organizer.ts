@@ -1,15 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasPublicSupabaseEnv } from "@/lib/env";
 import { getReportsSnapshot } from "@/services/reports";
-import {
-  AdminWorkspaceError,
-  createInsurancePolicy,
-  deleteInsurancePolicy,
-  getAdminInsurancePage,
-  getInsuranceDetail,
-  getPatientOptions,
-  updateInsurancePolicy
-} from "@/services/admin-workspace";
 import type {
   AdminInsuranceDetail,
   AdminInsurancePage,
@@ -21,6 +12,8 @@ import type {
   OrganizerMedicationRecord,
   OrganizerMedicationsSnapshot,
   OrganizerOfficeRecord,
+  OrganizerOfficePayload,
+  OrganizerOfficeDetail,
   OrganizerOfficesSnapshot,
   OrganizerPatientDetail,
   OrganizerPatientPayload,
@@ -66,7 +59,7 @@ async function requireOrganizerContext(): Promise<OrganizerContext> {
   if (!hasPublicSupabaseEnv()) {
     throw new OrganizerServiceError(
       500,
-      "Supabase authentication is required for admin APIs."
+      "Supabase authentication is required for organizer APIs."
     );
   }
 
@@ -90,10 +83,10 @@ async function requireOrganizerContext(): Promise<OrganizerContext> {
     throw new OrganizerServiceError(403, "Unable to resolve your workspace profile.");
   }
 
-  if (profile.role !== "admin") {
+  if (profile.role !== "organizer") {
     throw new OrganizerServiceError(
       403,
-      "Admin access is only available to organization administrators."
+      "Organizer access is only available to organizers."
     );
   }
 
@@ -134,7 +127,7 @@ export async function getOrganizerDashboardSnapshot(): Promise<OrganizerDashboar
 
   const [
     patientCountResult,
-    providerResult,
+    officesResult,
     prescriptionResult,
     caseResult,
     patientGrowthResult,
@@ -145,8 +138,8 @@ export async function getOrganizerDashboardSnapshot(): Promise<OrganizerDashboar
       .select("id", { count: "exact", head: true })
       .eq("organization_id", context.organizationId),
     context.db
-      .from("providers")
-      .select("practice_name")
+      .from("offices")
+      .select("id", { count: "exact", head: true })
       .eq("organization_id", context.organizationId),
     context.db
       .from("prescriptions")
@@ -171,22 +164,16 @@ export async function getOrganizerDashboardSnapshot(): Promise<OrganizerDashboar
 
   if (
     patientCountResult.error ||
-    providerResult.error ||
+    officesResult.error ||
     prescriptionResult.error ||
     caseResult.error ||
     patientGrowthResult.error ||
     recentPatientsResult.error
   ) {
-    throw new OrganizerServiceError(500, "Unable to load admin dashboard data.");
+    throw new OrganizerServiceError(500, "Unable to load organizer dashboard data.");
   }
 
-  const officeNames = new Set<string>();
-  for (const row of providerResult.data ?? []) {
-    const value = String(row.practice_name ?? "").trim();
-    if (value) {
-      officeNames.add(value);
-    }
-  }
+  const officeCount = officesResult.count ?? 0;
 
   const medicationIds = new Set<string>();
   for (const row of prescriptionResult.data ?? []) {
@@ -216,7 +203,7 @@ export async function getOrganizerDashboardSnapshot(): Promise<OrganizerDashboar
 
   return {
     organizationName: context.organizationName,
-    sourceLabel: "Live admin data",
+    sourceLabel: "Live organizer data",
     summary: [
       {
         label: "Total patients",
@@ -225,8 +212,8 @@ export async function getOrganizerDashboardSnapshot(): Promise<OrganizerDashboar
       },
       {
         label: "Total offices",
-        value: String(officeNames.size),
-        detail: "Derived from provider practice names linked to your organization."
+        value: String(officeCount),
+        detail: "Office locations currently listed for your organization."
       },
       {
         label: "Total medications",
@@ -559,51 +546,145 @@ export async function getOrganizerMedicationsSnapshot(): Promise<OrganizerMedica
 export async function getOrganizerOfficesSnapshot(): Promise<OrganizerOfficesSnapshot> {
   const context = await requireOrganizerContext();
   const { data, error } = await context.db
-    .from("providers")
-    .select("id, practice_name, specialty, full_name, email, phone")
+    .from("offices")
+    .select(
+      "id, name, address_line_1, address_line_2, city, state, zip_code, phone, email, created_at, updated_at"
+    )
     .eq("organization_id", context.organizationId)
-    .order("practice_name", { ascending: true });
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new OrganizerServiceError(500, "Unable to load office data.");
   }
 
-  const grouped = new Map<string, OrganizerOfficeRecord>();
+  return {
+    mode: "managed",
+    note: "Manage office locations and contact details for the organization.",
+    rows: (data ?? []).map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      addressLine1: row.address_line_1,
+      addressLine2: row.address_line_2,
+      city: row.city,
+      state: row.state,
+      zipCode: row.zip_code,
+      phone: row.phone,
+      email: row.email,
+      createdAt: formatDate(row.created_at),
+      updatedAt: formatDate(row.updated_at)
+    }))
+  };
+}
 
-  for (const row of data ?? []) {
-    const practiceName = String(row.practice_name ?? "").trim() || "Unassigned practice";
-    const key = practiceName.toLowerCase();
-    const current =
-      grouped.get(key) ??
-      ({
-        id: key,
-        name: practiceName,
-        providerCount: 0,
-        specialties: [],
-        contacts: []
-      } satisfies OrganizerOfficeRecord);
+export async function getOrganizerOfficeDetail(
+  officeId: string
+): Promise<OrganizerOfficeDetail> {
+  const context = await requireOrganizerContext();
+  const { data, error } = await context.db
+    .from("offices")
+    .select(
+      "id, name, address_line_1, address_line_2, city, state, zip_code, phone, email, created_at, updated_at"
+    )
+    .eq("organization_id", context.organizationId)
+    .eq("id", officeId)
+    .maybeSingle();
 
-    current.providerCount += 1;
-    if (row.specialty && !current.specialties.includes(row.specialty)) {
-      current.specialties.push(row.specialty);
-    }
+  if (error) {
+    throw new OrganizerServiceError(500, "Unable to load the office record.");
+  }
 
-    const contact = row.email ?? row.phone ?? row.full_name;
-    if (contact && !current.contacts.includes(contact)) {
-      current.contacts.push(contact);
-    }
-
-    grouped.set(key, current);
+  if (!data) {
+    throw new OrganizerServiceError(404, "Office not found.");
   }
 
   return {
-    mode: "derived",
-    note:
-      "The current schema does not expose an offices table, so this directory is derived from provider practice names and remains read-only until the data model changes.",
-    rows: Array.from(grouped.values()).sort((left, right) =>
-      left.name.localeCompare(right.name)
-    )
+    id: data.id,
+    name: data.name,
+    addressLine1: data.address_line_1,
+    addressLine2: data.address_line_2,
+    city: data.city,
+    state: data.state,
+    zipCode: data.zip_code,
+    phone: data.phone,
+    email: data.email,
+    createdAt: formatDate(data.created_at),
+    updatedAt: formatDate(data.updated_at)
   };
+}
+
+export async function createOrganizerOffice(payload: OrganizerOfficePayload) {
+  const context = await requireOrganizerContext();
+  const normalized = normalizeOfficePayload(payload);
+
+  const { data, error } = await context.db
+    .from("offices")
+    .insert({
+      organization_id: context.organizationId,
+      name: normalized.name,
+      address_line_1: normalized.addressLine1,
+      address_line_2: normalized.addressLine2,
+      city: normalized.city,
+      state: normalized.state,
+      zip_code: normalized.zipCode,
+      phone: normalized.phone,
+      email: normalized.email
+    })
+    .select("id")
+    .single();
+
+  if (error || !data?.id) {
+    throw new OrganizerServiceError(500, error?.message ?? "Unable to create the office.");
+  }
+
+  return { id: data.id };
+}
+
+export async function updateOrganizerOffice(
+  officeId: string,
+  payload: OrganizerOfficePayload
+) {
+  const context = await requireOrganizerContext();
+  const normalized = normalizeOfficePayload(payload);
+
+  const { data, error } = await context.db
+    .from("offices")
+    .update({
+      name: normalized.name,
+      address_line_1: normalized.addressLine1,
+      address_line_2: normalized.addressLine2,
+      city: normalized.city,
+      state: normalized.state,
+      zip_code: normalized.zipCode,
+      phone: normalized.phone,
+      email: normalized.email
+    })
+    .eq("organization_id", context.organizationId)
+    .eq("id", officeId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data?.id) {
+    throw new OrganizerServiceError(500, error?.message ?? "Unable to update the office.");
+  }
+
+  return { id: data.id };
+}
+
+export async function deleteOrganizerOffice(officeId: string) {
+  const context = await requireOrganizerContext();
+  const { data, error } = await context.db
+    .from("offices")
+    .delete()
+    .eq("organization_id", context.organizationId)
+    .eq("id", officeId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data?.id) {
+    throw new OrganizerServiceError(500, error?.message ?? "Unable to delete the office.");
+  }
+
+  return { id: data.id };
 }
 
 export async function getOrganizerReportsSnapshot(): Promise<OrganizerReportsSnapshot> {
@@ -627,7 +708,7 @@ export async function getOrganizerReportsSnapshot(): Promise<OrganizerReportsSna
       id: row.id,
       type: String(metadata.reportType ?? "Operations export"),
       generatedAt: formatDate(row.created_at),
-      source: String(metadata.actorName ?? context.profile.full_name ?? "Admin"),
+      source: String(metadata.actorName ?? context.profile.full_name ?? "Organizer"),
       downloadUrl: "/reports/export"
     };
   });
@@ -637,7 +718,7 @@ export async function getOrganizerReportsSnapshot(): Promise<OrganizerReportsSna
       {
         label: "Generated exports",
         value: String(logRows.length),
-        note: "Audit log entries created from the admin reporting workflow."
+        note: "Audit log entries created from the organizer reporting workflow."
       },
       ...baseSnapshot.metrics.slice(0, 2),
       {
@@ -673,7 +754,7 @@ export async function generateOrganizerReport(reportType: string) {
     action: "generated",
     metadata: {
       reportType: normalizedType,
-      actorName: context.profile.full_name ?? "Admin"
+      actorName: context.profile.full_name ?? "Organizer"
     }
   });
 
@@ -695,9 +776,9 @@ export async function getOrganizerProfileSnapshot(): Promise<OrganizerProfileSna
     fullName: context.profile.full_name ?? "",
     email: context.profile.email ?? "",
     phone: context.profile.phone ?? "",
-    title: context.profile.title ?? "Admin",
+    title: context.profile.title ?? "Organizer",
     organizationName: context.organizationName,
-    roleLabel: "Admin"
+    roleLabel: "Organizer"
   };
 }
 
@@ -730,7 +811,7 @@ export async function updateOrganizerProfile(payload: {
   if (error || !data?.id) {
     throw new OrganizerServiceError(
       500,
-      error?.message ?? "Unable to update the admin profile."
+      error?.message ?? "Unable to update the organizer profile."
     );
   }
 
@@ -741,56 +822,180 @@ export async function getOrganizerInsurancePage(options: {
   query?: string;
   page?: string | number;
 }): Promise<AdminInsurancePage> {
-  try {
-    return await getAdminInsurancePage(options);
-  } catch (error) {
-    throw mapOrganizerInsuranceError(error);
+  const context = await requireOrganizerContext();
+  const query = String(options.query ?? "").trim();
+  const page = Math.max(1, Number(options.page ?? 1) || 1);
+  const from = (page - 1) * DEFAULT_PAGE_SIZE;
+  const to = from + DEFAULT_PAGE_SIZE - 1;
+
+  let builder = context.db
+    .from("insurance_policies")
+    .select(
+      "id, payer_name, plan_name, member_id, status, created_at, patients(first_name,last_name)",
+      { count: "exact" }
+    )
+    .eq("organization_id", context.organizationId)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (query) {
+    builder = builder.or(
+      `payer_name.ilike.%${query}%,plan_name.ilike.%${query}%,member_id.ilike.%${query}%`
+    );
   }
+
+  const { data, error, count } = await builder;
+
+  if (error) {
+    throw new OrganizerServiceError(500, "Unable to load insurance policies.");
+  }
+
+  const total = count ?? 0;
+
+  return {
+    rows: (data ?? []).map((row: any) => ({
+      id: row.id,
+      patientName: `${row.patients?.first_name ?? ""} ${row.patients?.last_name ?? ""}`.trim(),
+      payerName: row.payer_name,
+      planName: row.plan_name ?? "Plan pending",
+      memberId: row.member_id,
+      status: row.status,
+      createdAt: formatDate(row.created_at)
+    })),
+    total,
+    page,
+    pageSize: DEFAULT_PAGE_SIZE,
+    totalPages: Math.max(1, Math.ceil(total / DEFAULT_PAGE_SIZE)),
+    query
+  };
 }
 
 export async function getOrganizerInsuranceDetail(
   insuranceId: string
 ): Promise<AdminInsuranceDetail> {
-  try {
-    return await getInsuranceDetail(insuranceId);
-  } catch (error) {
-    throw mapOrganizerInsuranceError(error);
+  const context = await requireOrganizerContext();
+  const { data } = await context.db
+    .from("insurance_policies")
+    .select(
+      "id, patient_id, payer_name, plan_name, member_id, group_number, bin, pcn, status, verification_notes, created_at, patients(first_name,last_name)"
+    )
+    .eq("organization_id", context.organizationId)
+    .eq("id", insuranceId)
+    .maybeSingle();
+
+  if (!data) {
+    throw new OrganizerServiceError(404, "Insurance policy not found.");
   }
+
+  return {
+    id: data.id,
+    patientId: data.patient_id,
+    patientName: `${data.patients?.first_name ?? ""} ${data.patients?.last_name ?? ""}`.trim(),
+    payerName: data.payer_name,
+    planName: data.plan_name ?? "",
+    memberId: data.member_id,
+    groupNumber: data.group_number ?? "",
+    bin: data.bin ?? "",
+    pcn: data.pcn ?? "",
+    status: data.status,
+    verificationNotes: data.verification_notes ?? "",
+    createdAt: formatDate(data.created_at)
+  };
 }
 
 export async function createOrganizerInsurancePolicy(payload: AdminInsurancePayload) {
-  try {
-    return await createInsurancePolicy(payload);
-  } catch (error) {
-    throw mapOrganizerInsuranceError(error);
+  const context = await requireOrganizerContext();
+  const normalized = normalizeInsurancePayload(payload);
+
+  const { data, error } = await context.db
+    .from("insurance_policies")
+    .insert({
+      organization_id: context.organizationId,
+      patient_id: normalized.patientId,
+      payer_name: normalized.payerName,
+      plan_name: normalized.planName,
+      member_id: normalized.memberId,
+      group_number: normalized.groupNumber,
+      bin: normalized.bin,
+      pcn: normalized.pcn,
+      status: normalized.status,
+      verification_notes: normalized.verificationNotes
+    })
+    .select("id")
+    .single();
+
+  if (error || !data?.id) {
+    throw new OrganizerServiceError(500, error?.message ?? "Unable to create insurance.");
   }
+
+  return { id: data.id };
 }
 
 export async function updateOrganizerInsurancePolicy(
   insuranceId: string,
   payload: AdminInsurancePayload
 ) {
-  try {
-    return await updateInsurancePolicy(insuranceId, payload);
-  } catch (error) {
-    throw mapOrganizerInsuranceError(error);
+  const context = await requireOrganizerContext();
+  const normalized = normalizeInsurancePayload(payload);
+
+  const { data, error } = await context.db
+    .from("insurance_policies")
+    .update({
+      patient_id: normalized.patientId,
+      payer_name: normalized.payerName,
+      plan_name: normalized.planName,
+      member_id: normalized.memberId,
+      group_number: normalized.groupNumber,
+      bin: normalized.bin,
+      pcn: normalized.pcn,
+      status: normalized.status,
+      verification_notes: normalized.verificationNotes
+    })
+    .eq("organization_id", context.organizationId)
+    .eq("id", insuranceId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data?.id) {
+    throw new OrganizerServiceError(500, error?.message ?? "Unable to update insurance.");
   }
+
+  return { id: data.id };
 }
 
 export async function deleteOrganizerInsurancePolicy(insuranceId: string) {
-  try {
-    return await deleteInsurancePolicy(insuranceId);
-  } catch (error) {
-    throw mapOrganizerInsuranceError(error);
+  const context = await requireOrganizerContext();
+  const { data, error } = await context.db
+    .from("insurance_policies")
+    .delete()
+    .eq("organization_id", context.organizationId)
+    .eq("id", insuranceId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data?.id) {
+    throw new OrganizerServiceError(500, error?.message ?? "Unable to delete insurance.");
   }
+
+  return { id: data.id };
 }
 
 export async function getOrganizerPatientOptions(): Promise<AdminPatientOption[]> {
-  try {
-    return await getPatientOptions();
-  } catch (error) {
-    throw mapOrganizerInsuranceError(error);
+  const context = await requireOrganizerContext();
+  const { data, error } = await context.db
+    .from("patients")
+    .select("id, first_name, last_name")
+    .eq("organization_id", context.organizationId)
+    .order("first_name", { ascending: true });
+
+  if (error) {
+    throw new OrganizerServiceError(500, "Unable to load patient options.");
   }
+
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    label: `${row.first_name} ${row.last_name}`.trim()
+  }));
 }
 
 function normalizePatientPayload(payload: OrganizerPatientPayload) {
@@ -824,21 +1029,58 @@ function normalizePatientPayload(payload: OrganizerPatientPayload) {
   };
 }
 
+function normalizeInsurancePayload(payload: AdminInsurancePayload) {
+  const patientId = String(payload.patientId ?? "").trim();
+  const payerName = String(payload.payerName ?? "").trim();
+  const memberId = String(payload.memberId ?? "").trim();
+
+  if (!patientId || !payerName || !memberId) {
+    throw new OrganizerServiceError(
+      400,
+      "Patient, payer name, and member ID are required."
+    );
+  }
+
+  return {
+    patientId,
+    payerName,
+    memberId,
+    planName: normalizeOptionalText(payload.planName),
+    groupNumber: normalizeOptionalText(payload.groupNumber),
+    bin: normalizeOptionalText(payload.bin),
+    pcn: normalizeOptionalText(payload.pcn),
+    status: payload.status,
+    verificationNotes: normalizeOptionalText(payload.verificationNotes)
+  };
+}
+
+function normalizeOfficePayload(payload: OrganizerOfficePayload) {
+  const name = String(payload.name ?? "").trim();
+
+  if (name.length < 2) {
+    throw new OrganizerServiceError(400, "Office name must be at least 2 characters.");
+  }
+
+  const email = normalizeOptionalText(payload.email);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new OrganizerServiceError(400, "Enter a valid office email address.");
+  }
+
+  return {
+    name,
+    addressLine1: normalizeOptionalText(payload.addressLine1),
+    addressLine2: normalizeOptionalText(payload.addressLine2),
+    city: normalizeOptionalText(payload.city),
+    state: normalizeOptionalText(payload.state),
+    zipCode: normalizeOptionalText(payload.zipCode),
+    phone: normalizeOptionalText(payload.phone),
+    email
+  };
+}
+
 function normalizeOptionalText(value: unknown) {
   const normalized = String(value ?? "").trim();
   return normalized ? normalized : null;
-}
-
-function mapOrganizerInsuranceError(error: unknown) {
-  if (error instanceof OrganizerServiceError) {
-    return error;
-  }
-
-  if (error instanceof AdminWorkspaceError) {
-    return new OrganizerServiceError(error.status, error.message);
-  }
-
-  return new OrganizerServiceError(500, "Unable to manage organizer insurance.");
 }
 
 function formatDate(value: string | null) {

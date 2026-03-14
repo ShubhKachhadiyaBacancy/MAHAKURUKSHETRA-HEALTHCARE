@@ -4,6 +4,7 @@ import { ProviderProfileForm } from "@/components/features/provider/provider-pro
 import { PageIntro } from "@/components/layout/page-intro";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { Card } from "@/components/ui/card";
+import { getAdminProfileSnapshot } from "@/services/admin-workspace";
 import { getOrganizerProfileSnapshot } from "@/services/organizer";
 import { getPatientProfileSnapshot } from "@/services/patient";
 import { getProviderProfileSnapshot } from "@/services/provider";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function ProfilePage() {
   const viewer = await requireViewerContext();
 
-  if (viewer.role === "patient") {
+  if (viewer.role === "patients") {
     const snapshot = await getPatientProfileSnapshot();
 
     return (
@@ -29,7 +30,7 @@ export default async function ProfilePage() {
     );
   }
 
-  if (viewer.role === "provider") {
+  if (viewer.role === "doctor") {
     const snapshot = await getProviderProfileSnapshot();
 
     return (
@@ -44,22 +45,37 @@ export default async function ProfilePage() {
     );
   }
 
-  if (viewer.role !== "admin") {
+  if (viewer.role === "organizer") {
+    const snapshot = await getOrganizerProfileSnapshot();
+
     return (
-        <WorkspaceShell pathname="/profile" viewer={viewer}>
-          <Card className="p-6 text-sm text-slate-600 dark:text-slate-300">
-          Profile tools for this workspace are currently available to admins and doctors.
-          </Card>
-        </WorkspaceShell>
-      );
+      <WorkspaceShell pathname="/profile" viewer={viewer}>
+        <PageIntro
+          description="View and update the organizer identity that controls the organization workspace."
+          eyebrow="Profile"
+          title="Organizer profile"
+        />
+        <OrganizerProfileForm snapshot={snapshot} />
+      </WorkspaceShell>
+    );
   }
 
-  const snapshot = await getOrganizerProfileSnapshot();
+  if (viewer.role !== "admin") {
+    return (
+      <WorkspaceShell pathname="/profile" viewer={viewer}>
+        <Card className="p-6 text-sm text-slate-600 dark:text-slate-300">
+          Profile tools for this workspace are currently available to admins, organizers, doctors, and patients.
+        </Card>
+      </WorkspaceShell>
+    );
+  }
+
+  const snapshot = await getAdminProfileSnapshot();
 
   return (
     <WorkspaceShell pathname="/profile" viewer={viewer}>
       <PageIntro
-        description="View and update the administrator identity that controls the organization workspace."
+        description="View and update the admin identity that controls system-level access."
         eyebrow="Profile"
         title="Admin profile"
       />

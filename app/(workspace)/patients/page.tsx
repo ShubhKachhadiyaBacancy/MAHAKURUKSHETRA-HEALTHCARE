@@ -26,11 +26,11 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
   const query = resolvedSearchParams.q ?? "";
   const viewer = await requireViewerContext();
 
-  if (viewer.role === "patient") {
+  if (viewer.role === "patients") {
     redirect("/claims");
   }
 
-  if (viewer.role === "admin") {
+  if (viewer.role === "organizer") {
     const snapshot = await getOrganizerPatientsPage({
       query,
       page: resolvedSearchParams.page ?? "1",
@@ -67,7 +67,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
         <form className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_180px_auto]" method="get">
           <Input defaultValue={query} name="q" placeholder="Search by patient, email, or phone" />
           <select
-            className="min-h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-brand/10"
+            className="field-control"
             defaultValue={snapshot.sort}
             name="sort"
           >
@@ -76,7 +76,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
             <option value="first_name">First name</option>
           </select>
           <select
-            className="min-h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-brand/10"
+            className="field-control"
             defaultValue={snapshot.direction}
             name="direction"
           >
@@ -97,24 +97,24 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
           </div>
           <div className="flex gap-3">
             {snapshot.page <= 1 ? (
-              <span className="inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-full border border-slate-200 px-5 text-sm font-medium text-slate-400">
+              <span className="ui-link-button ui-link-button--disabled">
                 Previous
               </span>
             ) : (
               <a
-                className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                className="ui-link-button"
                 href={buildPatientsUrl(snapshot.page - 1)}
               >
                 Previous
               </a>
             )}
             {snapshot.page >= snapshot.totalPages ? (
-              <span className="inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-full border border-slate-200 px-5 text-sm font-medium text-slate-400">
+              <span className="ui-link-button ui-link-button--disabled">
                 Next
               </span>
             ) : (
               <a
-                className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+                className="ui-link-button"
                 href={buildPatientsUrl(snapshot.page + 1)}
               >
                 Next
@@ -126,9 +126,21 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
     );
   }
 
+  if (viewer.role === "admin") {
+    return (
+      <WorkspaceShell pathname="/patients" viewer={viewer}>
+        <PageIntro
+          description="Patient access queues are reserved for organizers and doctors."
+          eyebrow="Patients"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
   const cases = await getCaseList(query);
-  const isDoctor = viewer.role === "provider";
-  const canCreateCase = ["admin", "case_manager"].includes(viewer.role);
+  const isDoctor = viewer.role === "doctor";
+  const canCreateCase = viewer.role === "organizer";
 
   return (
     <WorkspaceShell pathname="/patients" viewer={viewer}>
@@ -142,7 +154,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
             <div className="rounded-2xl border border-slate-200 px-4 py-3 text-xs text-slate-600">
               {isDoctor
                 ? "Open an assigned patient to review details and send feedback."
-                : "Ask your administrator to create cases or grant broader permissions."}
+                : "Ask your organizer to create cases or grant broader permissions."}
             </div>
           )
         }

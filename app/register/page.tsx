@@ -15,20 +15,16 @@ export default async function RegisterPage() {
 
   const onboardingFlow = [
     {
-      title: "1. Create the admin shell",
-      body: "This is the only public registration path. It provisions the Supabase auth user, seeds the organization, and builds the admin workspace."
+      title: "1. Create the organizer account",
+      body: "This provisions the first workspace owner and creates the organization shell."
     },
     {
-      title: "2. Invite providers and case managers",
-      body: "Admins use the workspace admin console to add collaborators, which attaches provider and case-manager operational records with the right ownership."
+      title: "2. Invite the team",
+      body: "Organizers add doctors and patients after sign-in."
     },
     {
-      title: "3. Register patients after sign-in",
-      body: "Authenticated admins, providers, and case managers use the intake workspace to register patients, prescriptions, prior auth, and affordability cases."
-    },
-    {
-      title: "4. External stakeholders consume analytics",
-      body: "Pharmacies, payers, and manufacturers access controlled analytics paths. No public self-registration is exposed for them."
+      title: "3. Start intake",
+      body: "Patient registration and therapy workflows stay inside the authenticated workspace."
     }
   ];
 
@@ -64,13 +60,7 @@ export default async function RegisterPage() {
                   <span className="eyebrow register-kicker">Next step after registration</span>
                   <div className="mt-4 space-y-3 text-sm leading-7 register-body">
                     <p>
-                      Sign in to access the workspace, invite providers and case managers from
-                      the admin console, and register patients through the authenticated intake
-                      experience.
-                    </p>
-                    <p>
-                      External stakeholders such as pharmacies and payers consume controlled
-                      analytics rather than public signup flows.
+                      Sign in, invite doctors and patients, and begin intake from the main workspace.
                     </p>
                   </div>
                   <Link

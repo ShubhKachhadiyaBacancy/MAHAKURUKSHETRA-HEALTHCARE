@@ -19,7 +19,8 @@ export function AdminUserForm({ mode, user }: AdminUserFormProps) {
     password: "",
     phone: user?.phone ?? "",
     title: user?.title ?? "",
-    role: user?.role ?? "staff",
+    role: user?.role ?? "organizer",
+    organizationName: user?.organizationName ?? "",
     practiceName: user?.practiceName ?? "",
     specialty: user?.specialty ?? "",
     providerNpi: user?.providerNpi ?? ""
@@ -92,6 +93,15 @@ export function AdminUserForm({ mode, user }: AdminUserFormProps) {
 
         <div className="detail-grid">
           <div className="form-field">
+            <label htmlFor="organizationName">Organization</label>
+            <Input
+              id="organizationName"
+              value={form.organizationName}
+              onChange={(event) => updateField("organizationName", event.target.value)}
+              placeholder="Northstar Specialty Care"
+            />
+          </div>
+          <div className="form-field">
             <label htmlFor="password">
               {mode === "create" ? "Password" : "Password (leave blank to keep current)"}
             </label>
@@ -110,10 +120,9 @@ export function AdminUserForm({ mode, user }: AdminUserFormProps) {
               onChange={(event) => updateField("role", event.target.value)}
             >
               <option value="admin">Admin</option>
-              <option value="patient">Patient</option>
-              <option value="provider">Provider</option>
-              <option value="case_manager">Case manager</option>
-              <option value="staff">Staff</option>
+              <option value="organizer">Organizer</option>
+              <option value="patients">Patients</option>
+              <option value="doctor">Doctor</option>
             </Select>
           </div>
         </div>

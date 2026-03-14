@@ -11,12 +11,14 @@ type AdminInsuranceFormProps = {
   mode: "create" | "edit";
   insurance?: AdminInsuranceDetail;
   patients: AdminPatientOption[];
+  apiBase?: string;
 };
 
 export function AdminInsuranceForm({
   mode,
   insurance,
-  patients
+  patients,
+  apiBase = "/api/organizer"
 }: AdminInsuranceFormProps) {
   const [form, setForm] = useState({
     patientId: insurance?.patientId ?? patients[0]?.id ?? "",
@@ -44,8 +46,8 @@ export function AdminInsuranceForm({
     try {
       const response = await fetch(
         mode === "create"
-          ? "/api/organizer/insurance"
-          : `/api/organizer/insurance/${insurance?.id}`,
+          ? `${apiBase}/insurance`
+          : `${apiBase}/insurance/${insurance?.id}`,
         {
           method: mode === "create" ? "POST" : "PATCH",
           headers: {

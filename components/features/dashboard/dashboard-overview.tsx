@@ -34,14 +34,14 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
                 Cases needing coordinated action
               </h2>
             </div>
-            <Link className="text-sm font-medium text-slate-900 underline" href="/patients">
+            <Link className="text-sm font-semibold text-slate-900 underline" href="/patients">
               View all
             </Link>
           </div>
 
           {data.cases.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200 text-left">
+              <table className="workspace-table min-w-full divide-y divide-slate-200 text-left">
                 <thead>
                   <tr className="text-xs uppercase tracking-[0.24em] text-slate-500">
                     <th className="px-6 py-4 font-medium">Patient</th>
@@ -96,7 +96,7 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
               {data.outreachQueue.length > 0 ? (
                 data.outreachQueue.map((item) => (
                   <div
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4"
+                    className="panel-muted px-4 py-4"
                     key={`${item.recipient}-${item.scheduledFor}`}
                   >
                     <div className="text-sm font-medium text-slate-900">{item.recipient}</div>
@@ -107,7 +107,7 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-4 text-sm text-slate-600">
+                <div className="panel-muted border-dashed px-4 py-4 text-sm text-slate-600">
                   No scheduled patient touches are waiting for you.
                 </div>
               )}
@@ -123,7 +123,7 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
               {data.activityLog.length > 0 ? (
                 data.activityLog.map((item) => (
                   <div
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4"
+                    className="panel-muted px-4 py-4"
                     key={`${item.timestamp}-${item.title}`}
                   >
                     <div className="text-sm font-medium text-slate-900">{item.title}</div>
@@ -136,7 +136,7 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-4 text-sm text-slate-600">
+                <div className="panel-muted border-dashed px-4 py-4 text-sm text-slate-600">
                   Activity will appear here after your assigned cases move.
                 </div>
               )}

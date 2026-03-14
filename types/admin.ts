@@ -28,6 +28,20 @@ export type AdminDashboardSnapshot = {
     status: InsuranceRow["status"];
     createdAt: string;
   }>;
+  userCharts: Array<{
+    id: string;
+    fullName: string;
+    email: string;
+    role: ProfileRow["role"];
+    title: string;
+    createdAt: string;
+    detail: string;
+    metrics: Array<{
+      label: string;
+      value: number;
+      tone: "sky" | "emerald" | "amber";
+    }>;
+  }>;
 };
 
 export type AdminUserListItem = {
@@ -57,6 +71,7 @@ export type AdminUserPayload = {
   phone?: string | null;
   title?: string | null;
   role: ProfileRow["role"];
+  organizationName?: string | null;
   practiceName?: string | null;
   specialty?: string | null;
   providerNpi?: string | null;

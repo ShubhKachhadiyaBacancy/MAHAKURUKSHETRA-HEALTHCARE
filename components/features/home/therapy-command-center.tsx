@@ -1,154 +1,225 @@
-"use client";
+import {
+  ClipboardPulseIcon,
+  QueueIcon,
+  ShieldCheckIcon,
+  TimerIcon,
+  TrendUpIcon
+} from "@/components/ui/icons";
 
-import type { CSSProperties, MouseEvent } from "react";
-import { useState } from "react";
-
-type CommandStyle = CSSProperties & {
-  "--rotate-x": string;
-  "--rotate-y": string;
-  "--move-x": string;
-  "--move-y": string;
-};
-
-const baseStyle: CommandStyle = {
-  "--rotate-x": "-10deg",
-  "--rotate-y": "14deg",
-  "--move-x": "0px",
-  "--move-y": "0px"
-};
+const caseSummary = [
+  {
+    label: "Patient",
+    value: "Maya Chen",
+    icon: ShieldCheckIcon
+  },
+  {
+    label: "Therapy",
+    value: "Stelara onboarding",
+    icon: ClipboardPulseIcon
+  },
+  {
+    label: "Next move",
+    value: "Submit PA packet",
+    icon: TimerIcon
+  }
+];
 
 const readinessChecklist = [
   {
     label: "Benefits verified",
-    description: "Plan and pharmacy distribution route confirmed.",
+    description: "Plan, channel, and case ownership confirmed.",
     progress: "92%"
   },
   {
-    label: "PA packet assembled",
-    description: "Clinical notes, labs, and payer criteria aligned.",
+    label: "Authorization packet",
+    description: "Clinical notes and labs assembled for submission.",
     progress: "84%"
   },
   {
-    label: "Affordability mapped",
-    description: "Copay and patient support options attached to the case.",
+    label: "Affordability options",
+    description: "Copay support attached before first fill outreach.",
     progress: "76%"
   }
 ];
 
-const operationalSignals = [
-  { value: "14", label: "cases due by noon" },
-  { value: "4", label: "payer escalations" },
-  { value: "9", label: "first-fill clearances" }
+const quickStats = [
+  {
+    value: "14",
+    label: "Cases due today",
+    detail: "Response windows prioritized by urgency.",
+    icon: TimerIcon
+  },
+  {
+    value: "4",
+    label: "Payer escalations",
+    detail: "Active blockers routed for follow-up.",
+    icon: QueueIcon
+  },
+  {
+    value: "9",
+    label: "First fills cleared",
+    detail: "Starts progressed without queue drift.",
+    icon: TrendUpIcon
+  }
 ];
 
-const timeline = [
-  "Enrollment complete",
-  "Clinical review",
-  "Coverage approved",
-  "Patient ready"
+const focusQueue = [
+  "Appeal signature pending from provider",
+  "Bridge support available for two starts",
+  "Patient callback window closes at 11:40 AM"
 ];
 
 export function TherapyCommandCenter() {
-  const [style, setStyle] = useState<CommandStyle>(baseStyle);
-
-  function handlePointerMove(event: MouseEvent<HTMLDivElement>) {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
-
-    setStyle({
-      "--rotate-x": `${-8 - vertical * 12}deg`,
-      "--rotate-y": `${12 + horizontal * 18}deg`,
-      "--move-x": `${horizontal * 16}px`,
-      "--move-y": `${vertical * 12}px`
-    });
-  }
-
-  function resetTilt() {
-    setStyle(baseStyle);
-  }
-
   return (
-    <div
-      className="command-stage"
-      onMouseLeave={resetTilt}
-      onMouseMove={handlePointerMove}
-    >
-      <div className="command-aurora command-aurora--one" />
-      <div className="command-aurora command-aurora--two" />
-      <div className="command-orbit" aria-hidden>
-        <span className="command-node command-node--one" />
-        <span className="command-node command-node--two" />
-        <span className="command-node command-node--three" />
+    <section className="panel command-stage overflow-hidden p-6 sm:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="max-w-2xl">
+          <span className="eyebrow">Main workspace preview</span>
+          <h2 className="mt-3 font-display text-4xl tracking-tight text-slate-950 sm:text-5xl">
+            Structured for fast clinical operations.
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+            The active case, queue health, and the next deadline stay visible in
+            one frame so teams can act quickly without scanning decorative noise.
+          </p>
+        </div>
+
+        <div
+          className="inline-flex items-center gap-2 rounded-full border bg-white/75 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--accent-strong)]"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <ShieldCheckIcon className="h-4 w-4" />
+          Queue healthy
+        </div>
       </div>
 
-      <div className="command-canvas" style={style}>
-        <div className="command-floating-card command-floating-card--left">
-          <span className="command-pill">Copay sync</span>
-          <strong>$4,280 recovered</strong>
-          <p>Support options surfaced before shipment coordination began.</p>
-        </div>
-
-        <div className="command-floating-card command-floating-card--right">
-          <span className="command-pill">Provider callback</span>
-          <strong>11:40 AM due</strong>
-          <p>Appeal narrative pending signature from the clinical team.</p>
-        </div>
-
-        <section className="command-board">
-          <div className="command-board__header">
-            <div>
-              <span className="command-label">Live therapy command center</span>
-              <h3>New start orchestration</h3>
-            </div>
-            <div className="command-board__status">
-              <span className="command-status-dot" />
-              <span>Queue healthy</span>
-            </div>
-          </div>
-
-          <div className="command-board__grid">
-            <div className="command-spotlight">
-              <div className="command-kpi">
-                <span>Therapy readiness</span>
-                <strong>86%</strong>
+      <div className="mt-8 grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_18.5rem]">
+        <div className="rounded-[28px] border border-slate-200 bg-white/75 p-5 sm:p-6">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-xl">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[var(--accent-strong)]">
+                  Active therapy start
+                </div>
+                <h3 className="mt-2 font-display text-3xl tracking-tight text-slate-950 sm:text-4xl">
+                  New start orchestration
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+                  The workspace opens on the blocker that matters now, then keeps
+                  the patient summary and readiness stack close enough to act on
+                  without context switching.
+                </p>
               </div>
 
-              <div className="command-list">
+              <div className="rounded-[24px] border border-slate-200 bg-slate-50 px-5 py-4 lg:min-w-[12rem]">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                  <TrendUpIcon className="h-4 w-4 text-[var(--accent-strong)]" />
+                  Therapy readiness
+                </div>
+                <div className="mt-3 font-display text-5xl leading-none tracking-tight text-slate-950">
+                  86%
+                </div>
+                <div className="mt-2 text-sm text-slate-600">
+                  Submission packet nearly complete.
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              {caseSummary.map(({ label, value, icon: Icon }) => (
+                <div className="panel-muted p-4" key={label}>
+                  <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-slate-500">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    {label}
+                  </div>
+                  <div className="mt-3 text-base font-semibold text-slate-900">
+                    {value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-[24px] border border-slate-200 bg-slate-50/90 p-5">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--accent-strong)]">
+                  <ClipboardPulseIcon className="h-4 w-4" />
+                  Progress stack
+                </div>
+                <div className="text-xs text-slate-500">
+                  Three steps visible on arrival
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-4">
                 {readinessChecklist.map((item) => (
-                  <div className="command-list__row" key={item.label}>
-                    <div className="command-list__copy">
-                      <p>{item.label}</p>
-                      <span>{item.description}</span>
+                  <div key={item.label}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="max-w-md">
+                        <div className="text-sm font-semibold text-slate-900">
+                          {item.label}
+                        </div>
+                        <div className="mt-1 text-sm text-slate-600">
+                          {item.description}
+                        </div>
+                      </div>
+                      <div className="text-sm font-semibold text-slate-900">
+                        {item.progress}
+                      </div>
                     </div>
-                    <div className="command-progress">
-                      <span style={{ width: item.progress }} />
+                    <div className="mt-3 h-2 rounded-full bg-slate-200">
+                      <div
+                        className="h-2 rounded-full bg-[var(--accent)]"
+                        style={{ width: item.progress }}
+                      />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="command-side-stack">
-              {operationalSignals.map((item) => (
-                <div className="command-stat" key={item.label}>
-                  <strong>{item.value}</strong>
-                  <span>{item.label}</span>
+        <div className="flex flex-col gap-4">
+          {quickStats.map(({ value, label, detail, icon: Icon }) => (
+            <div className="panel-muted p-5" key={label}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="font-display text-4xl tracking-tight text-slate-950">
+                  {value}
+                </div>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+                  <Icon className="h-4 w-4" />
+                </span>
+              </div>
+              <div className="mt-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                {label}
+              </div>
+              <div className="mt-2 text-sm leading-6 text-slate-600">{detail}</div>
+            </div>
+          ))}
+
+          <div className="rounded-[24px] border border-slate-200 bg-white/70 p-5">
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--accent-strong)]">
+              <QueueIcon className="h-4 w-4" />
+              Focus now
+            </div>
+            <div className="mt-4 space-y-3">
+              {focusQueue.map((item) => (
+                <div
+                  className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700"
+                  key={item}
+                >
+                  <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+                    <TimerIcon className="h-3.5 w-3.5" />
+                  </span>
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="command-trace">
-            {timeline.map((item, index) => (
-              <div className="command-trace__step" key={item}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <p>{item}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

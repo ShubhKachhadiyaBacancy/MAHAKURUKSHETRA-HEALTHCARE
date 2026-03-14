@@ -21,29 +21,19 @@ export function OrganizerOfficesPanel({ snapshot }: OrganizerOfficesPanelProps) 
                   {row.name}
                 </div>
                 <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                  {row.providerCount} linked provider{row.providerCount === 1 ? "" : "s"}
+                  {row.city || row.state || row.zipCode
+                    ? [row.city, row.state, row.zipCode].filter(Boolean).join(", ")
+                    : "Location pending"}
                 </div>
               </div>
 
               <div>
                 <div className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                  Specialties
+                  Address
                 </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {row.specialties.length > 0 ? (
-                    row.specialties.map((specialty) => (
-                      <span
-                        className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700 dark:bg-slate-900/70 dark:text-slate-200"
-                        key={specialty}
-                      >
-                        {specialty}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-sm text-slate-600 dark:text-slate-300">
-                      Specialty data pending
-                    </span>
-                  )}
+                <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                  {[row.addressLine1, row.addressLine2].filter(Boolean).join(", ") ||
+                    "Address pending"}
                 </div>
               </div>
 
@@ -52,10 +42,11 @@ export function OrganizerOfficesPanel({ snapshot }: OrganizerOfficesPanelProps) 
                   Contacts
                 </div>
                 <div className="mt-2 space-y-2 text-sm text-slate-600 dark:text-slate-300">
-                  {row.contacts.length > 0 ? (
-                    row.contacts.slice(0, 3).map((contact) => (
-                      <div key={contact}>{contact}</div>
-                    ))
+                  {[row.phone, row.email].filter(Boolean).length > 0 ? (
+                    [row.phone, row.email]
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((contact) => <div key={contact}>{contact}</div>)
                   ) : (
                     <div>Contact data pending</div>
                   )}

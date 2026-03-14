@@ -21,6 +21,19 @@ type UsersPageProps = {
 export default async function UsersPage({ searchParams }: UsersPageProps) {
   const viewer = await requireViewerContext();
   const resolvedSearchParams = await searchParams;
+
+  if (viewer.role !== "admin") {
+    return (
+      <WorkspaceShell pathname="/users" viewer={viewer}>
+        <PageIntro
+          description="User administration is reserved for admins."
+          eyebrow="Users"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
   const snapshot = await getAdminUsersPage({
     query: resolvedSearchParams.q ?? "",
     page: resolvedSearchParams.page ?? "1",
@@ -45,7 +58,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
             <Button>Create user</Button>
           </Link>
         }
-        description="Admins can create, update, and delete any workspace user, including other admins, while keeping every profile inside the current organization."
+        description="Admins can create, update, and delete any workspace user, including other admins."
         eyebrow="Users"
         title="User management"
       />
@@ -53,16 +66,15 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
       <form className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_auto]" method="get">
         <Input defaultValue={snapshot.query} name="q" placeholder="Search by name, email, or title" />
         <select
-          className="min-h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-slate-300 focus:ring-2 focus:ring-brand/10"
+          className="field-control"
           defaultValue={snapshot.role}
           name="role"
         >
           <option value="all">All roles</option>
           <option value="admin">Admin</option>
-          <option value="patient">Patient</option>
-          <option value="provider">Provider</option>
-          <option value="case_manager">Case manager</option>
-          <option value="staff">Staff</option>
+          <option value="organizer">Organizer</option>
+          <option value="patients">Patients</option>
+          <option value="doctor">Doctor</option>
         </select>
         <Button type="submit" variant="secondary">
           Apply
@@ -71,7 +83,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-left dark:divide-slate-800">
+          <table className="workspace-table min-w-full divide-y divide-slate-200 text-left dark:divide-slate-800">
             <thead>
               <tr className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
                 <th className="px-6 py-4 font-medium">User</th>
@@ -108,7 +120,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">
                       <Link
-                        className="inline-flex min-h-10 items-center rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:text-white dark:hover:bg-slate-900/70"
+                        className="ui-link-button"
                         href={`/users/${row.id}`}
                       >
                         Edit
@@ -133,7 +145,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         <div className="flex gap-3">
           {snapshot.page > 1 ? (
             <a
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+              className="ui-link-button"
               href={buildPageUrl(snapshot.page - 1)}
             >
               Previous
@@ -141,7 +153,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
           ) : null}
           {snapshot.page < snapshot.totalPages ? (
             <a
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+              className="ui-link-button"
               href={buildPageUrl(snapshot.page + 1)}
             >
               Next

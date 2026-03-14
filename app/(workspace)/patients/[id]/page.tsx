@@ -20,7 +20,7 @@ export default async function PatientDetailPage({
   const resolvedParams = await params;
   const viewer = await requireViewerContext();
 
-  if (viewer.role === "patient") {
+  if (viewer.role === "patients") {
     redirect("/claims");
   }
 
@@ -30,14 +30,14 @@ export default async function PatientDetailPage({
     <WorkspaceShell pathname="/patients" viewer={viewer}>
       <PageIntro
         description={
-          viewer.role === "provider"
+          viewer.role === "doctor"
             ? "Review the full assigned patient record and send doctor feedback directly into the case communication timeline."
             : "Each case combines patient identity, therapy, coverage, prior authorization, financial assistance, communications, and documents into one operational record."
         }
         eyebrow="Case detail"
         title={detail.patient.fullName}
       />
-      {viewer.role === "provider" ? (
+      {viewer.role === "doctor" ? (
         <ProviderFeedbackForm caseId={detail.id} patientName={detail.patient.fullName} />
       ) : null}
       <CaseDetailView detail={detail} />

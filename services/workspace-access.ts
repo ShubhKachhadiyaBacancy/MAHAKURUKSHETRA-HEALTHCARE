@@ -73,7 +73,7 @@ export async function getCurrentWorkspaceActor(): Promise<WorkspaceActor | null>
       title: profile.title
     },
     provider:
-      profile.role === "provider"
+      profile.role === "doctor"
         ? await resolveProviderRecord(db, {
             organizationId: profile.organization_id,
             email: profile.email,
@@ -90,10 +90,10 @@ export async function requireProviderActor(): Promise<WorkspaceActor> {
     throw new WorkspaceAccessError(401, "Authentication is required.");
   }
 
-  if (actor.role !== "provider") {
+  if (actor.role !== "doctor") {
     throw new WorkspaceAccessError(
       403,
-      "Doctor access is only available to provider accounts."
+      "Doctor access is only available to doctor accounts."
     );
   }
 

@@ -8,10 +8,22 @@ export const dynamic = "force-dynamic";
 export default async function NewUserPage() {
   const viewer = await requireViewerContext();
 
+  if (viewer.role !== "admin") {
+    return (
+      <WorkspaceShell pathname="/users" viewer={viewer}>
+        <PageIntro
+          description="User provisioning is reserved for admins."
+          eyebrow="Users"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
   return (
     <WorkspaceShell pathname="/users" viewer={viewer}>
       <PageIntro
-        description="Create a new workspace user in the current organization."
+        description="Create a new workspace user."
         eyebrow="Users"
         title="Create user"
       />

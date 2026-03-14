@@ -23,9 +23,7 @@ export function LoginForm() {
         Access the workspace
       </h1>
       <p className="mt-3 text-sm leading-7 text-slate-600">
-        Sign in with an existing workspace account to open live case data. If you
-        still need one, use the registration flow to create an organization and
-        seed the workspace automatically.
+        Use your existing account to open live case data.
       </p>
 
       <form action={formAction} className="mt-8 space-y-4">

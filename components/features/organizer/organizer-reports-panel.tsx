@@ -107,7 +107,7 @@ export function OrganizerReportsPanel({ snapshot }: OrganizerReportsPanelProps) 
 
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-left dark:divide-slate-800">
+            <table className="workspace-table min-w-full divide-y divide-slate-200 text-left dark:divide-slate-800">
               <thead>
                 <tr className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
                   <th className="px-6 py-4 font-medium">Report type</th>
@@ -130,7 +130,7 @@ export function OrganizerReportsPanel({ snapshot }: OrganizerReportsPanelProps) 
                     </td>
                     <td className="px-6 py-4 text-right">
                       <a
-                        className="inline-flex min-h-10 items-center rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:text-white dark:hover:bg-slate-900/70"
+                        className="ui-link-button"
                         href={row.downloadUrl}
                       >
                         Download

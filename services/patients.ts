@@ -21,7 +21,7 @@ export async function getCaseList(search = ""): Promise<CaseListItem[]> {
       return filterDemoCases(normalizedSearch);
     }
 
-    const isDoctor = actor.role === "provider";
+    const isDoctor = actor.role === "doctor";
     if (isDoctor && !actor.provider?.id) {
       return [];
     }
@@ -49,7 +49,7 @@ export async function getCaseList(search = ""): Promise<CaseListItem[]> {
       : await query;
 
     if (error || !data) {
-      return actor.role === "provider" ? [] : filterDemoCases(normalizedSearch);
+      return actor.role === "doctor" ? [] : filterDemoCases(normalizedSearch);
     }
 
     const mapped = data.map((row: any) => ({
@@ -71,9 +71,9 @@ export async function getCaseList(search = ""): Promise<CaseListItem[]> {
       }).format(new Date(row.updated_at))
     }));
 
-    return mapped.length > 0 ? mapped : actor.role === "provider" ? [] : filterDemoCases(normalizedSearch);
+    return mapped.length > 0 ? mapped : actor.role === "doctor" ? [] : filterDemoCases(normalizedSearch);
   } catch {
-    return actor?.role === "provider" ? [] : filterDemoCases(normalizedSearch);
+    return actor?.role === "doctor" ? [] : filterDemoCases(normalizedSearch);
   }
 }
 
@@ -91,7 +91,7 @@ export async function getCaseDetail(caseId: string): Promise<CaseDetail> {
       return demoCaseDetails[caseId] ?? demoCaseDetails["case-ava-thompson"];
     }
 
-    const isDoctor = actor.role === "provider";
+    const isDoctor = actor.role === "doctor";
     if (isDoctor && !actor.provider?.id) {
       notFound();
     }
@@ -157,7 +157,7 @@ export async function getCaseDetail(caseId: string): Promise<CaseDetail> {
       ]);
 
     if (caseResult.error || !caseResult.data) {
-      if (actor.role !== "provider" && demoCaseDetails[caseId]) {
+      if (actor.role !== "doctor" && demoCaseDetails[caseId]) {
         return demoCaseDetails[caseId];
       }
 
@@ -238,7 +238,7 @@ export async function getCaseDetail(caseId: string): Promise<CaseDetail> {
         })) ?? []
     };
   } catch {
-    if (actor?.role !== "provider" && demoCaseDetails[caseId]) {
+    if (actor?.role !== "doctor" && demoCaseDetails[caseId]) {
       return demoCaseDetails[caseId];
     }
 

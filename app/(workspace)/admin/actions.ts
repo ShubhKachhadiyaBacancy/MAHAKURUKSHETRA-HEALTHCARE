@@ -11,7 +11,7 @@ export type AdminInviteActionState = {
   message?: string;
 };
 
-const allowList: RegisterRole[] = ["patient", "provider", "case_manager", "staff"];
+const allowList: RegisterRole[] = ["organizer", "patients", "doctor"];
 
 export async function inviteUserAction(
   _previousState: AdminInviteActionState,
@@ -46,34 +46,30 @@ export async function inviteUserAction(
     "role" | "organization_id"
   > | null;
 
-  if (!profile || profile.role !== "admin" || !profile.organization_id) {
+  if (!profile || profile.role !== "admin") {
     return {
       status: "error",
       message: "Only administrators can send invites."
     };
   }
 
-  const { data: organizationData } = await supabaseSession
-    .from("organizations")
-    .select("name")
-    .eq("id", profile.organization_id)
-    .maybeSingle();
+  const { data: organizationData } = profile.organization_id
+    ? await supabaseSession
+        .from("organizations")
+        .select("name")
+        .eq("id", profile.organization_id)
+        .maybeSingle()
+    : { data: null };
   const organization = organizationData as Pick<
     Database["public"]["Tables"]["organizations"]["Row"],
     "name"
   > | null;
 
-  if (!organization?.name) {
-    return {
-      status: "error",
-      message: "Unable to resolve organization details."
-    };
-  }
-
   const email = readValue(formData, "email").toLowerCase();
   const fullName = readValue(formData, "fullName");
   const password = readValue(formData, "password");
-  const role = (readValue(formData, "role") || "provider") as RegisterRole;
+  const role = (readValue(formData, "role") || "doctor") as RegisterRole;
+  const organizationNameInput = readOptionalValue(formData, "organizationName");
   const phone = readOptionalValue(formData, "phone");
   const specialty = readOptionalValue(formData, "specialty");
   const practiceName = readOptionalValue(formData, "practiceName");
@@ -100,10 +96,10 @@ export async function inviteUserAction(
     };
   }
 
-  if (role === "provider" && (!practiceName || !specialty)) {
+  if (role === "doctor" && (!practiceName || !specialty)) {
     return {
       status: "error",
-      message: "Providers need a practice name and specialty."
+      message: "Doctors need a practice name and specialty."
     };
   }
 
@@ -111,6 +107,14 @@ export async function inviteUserAction(
     return {
       status: "error",
       message: "Enter a valid email address."
+    };
+  }
+
+  const resolvedOrganizationName = organization?.name ?? organizationNameInput;
+  if (role !== "admin" && !resolvedOrganizationName) {
+    return {
+      status: "error",
+      message: "Organization name is required for this invite."
     };
   }
 
@@ -141,7 +145,7 @@ export async function inviteUserAction(
       client: serviceClient,
       email,
       fullName,
-      organizationName: organization.name,
+      organizationName: resolvedOrganizationName ?? "",
       phone,
       practiceName,
       providerNpi,

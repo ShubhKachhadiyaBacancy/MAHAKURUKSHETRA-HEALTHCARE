@@ -30,12 +30,11 @@ export default async function LoginPage() {
           <div>
             <span className="eyebrow">Workspace access</span>
             <h1 className="mt-3 max-w-3xl font-display text-5xl tracking-tight text-slate-950 sm:text-6xl">
-              Sign in to access the admin workspace.
+              Sign in and return to the main workspace.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">
-              Authentication is required for dashboard, users, insurance,
-              medications, reports, and profile controls. Create the admin
-              account first if your organization has not been provisioned yet.
+              Keep the entry point simple: sign in if your team is already set up,
+              or create the organizer account first.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href={contactRoute}>

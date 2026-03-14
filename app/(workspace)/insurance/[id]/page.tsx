@@ -6,6 +6,7 @@ import {
   getOrganizerInsuranceDetail,
   getOrganizerPatientOptions
 } from "@/services/organizer";
+import { getInsuranceDetail, getPatientOptions } from "@/services/admin-workspace";
 import { requireViewerContext } from "@/services/viewer";
 
 export const dynamic = "force-dynamic";
@@ -21,17 +22,31 @@ export default async function InsuranceDetailPage({
 }: InsuranceDetailPageProps) {
   const viewer = await requireViewerContext();
   const { id } = await params;
-  const [insurance, patients] = await Promise.all([
-    getOrganizerInsuranceDetail(id),
-    getOrganizerPatientOptions()
-  ]);
+  if (viewer.role !== "admin" && viewer.role !== "organizer") {
+    return (
+      <WorkspaceShell pathname="/insurance" viewer={viewer}>
+        <PageIntro
+          description="Insurance management is reserved for admins and organizers."
+          eyebrow="Insurance"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
+  const [insurance, patients] = await Promise.all(
+    viewer.role === "admin"
+      ? [getInsuranceDetail(id), getPatientOptions()]
+      : [getOrganizerInsuranceDetail(id), getOrganizerPatientOptions()]
+  );
+  const apiBase = viewer.role === "admin" ? "/api/admin" : "/api/organizer";
 
   return (
     <WorkspaceShell pathname="/insurance" viewer={viewer}>
       <PageIntro
         action={
           <AdminDeleteButton
-            apiPath={`/api/organizer/insurance/${insurance.id}`}
+            apiPath={`${apiBase}/insurance/${insurance.id}`}
             confirmationMessage="Delete this insurance policy?"
             redirectTo="/insurance"
           />
@@ -40,7 +55,7 @@ export default async function InsuranceDetailPage({
         eyebrow="Insurance"
         title={insurance.patientName}
       />
-      <AdminInsuranceForm insurance={insurance} mode="edit" patients={patients} />
+      <AdminInsuranceForm insurance={insurance} mode="edit" patients={patients} apiBase={apiBase} />
     </WorkspaceShell>
   );
 }

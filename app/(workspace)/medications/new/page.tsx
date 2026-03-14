@@ -8,6 +8,18 @@ export const dynamic = "force-dynamic";
 export default async function NewMedicationPage() {
   const viewer = await requireViewerContext();
 
+  if (viewer.role !== "admin") {
+    return (
+      <WorkspaceShell pathname="/medications" viewer={viewer}>
+        <PageIntro
+          description="Medication creation is reserved for admins."
+          eyebrow="Medications"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
   return (
     <WorkspaceShell pathname="/medications" viewer={viewer}>
       <PageIntro

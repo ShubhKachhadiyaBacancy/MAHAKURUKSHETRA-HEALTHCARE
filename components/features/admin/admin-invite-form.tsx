@@ -14,31 +14,26 @@ const initialState: AdminInviteActionState = {
 
 const roleOptions = [
   {
-    value: "patient",
-    label: "Patient",
+    value: "patients",
+    label: "Patients",
     description: "Creates or links the patient record and unlocks the self-service claims workspace."
   },
   {
-    value: "provider",
-    label: "Provider (Doctor)",
+    value: "doctor",
+    label: "Doctor",
     description: "Creates provider records and ready cases tied to clinical workflows."
   },
   {
-    value: "case_manager",
-    label: "Case manager",
+    value: "organizer",
+    label: "Organizer",
     description: "Seeds outreach, affordability, and prior auth queues for this collaborator."
-  },
-  {
-    value: "staff",
-    label: "Staff",
-    description: "General workspace collaborator with read-only visibility."
   }
 ] as const;
 
 type RoleValue = (typeof roleOptions)[number]["value"];
 
 export function AdminInviteForm() {
-  const [selectedRole, setSelectedRole] = useState<RoleValue>("provider");
+  const [selectedRole, setSelectedRole] = useState<RoleValue>("doctor");
   const [actionState, formAction, isPending] = useActionState(inviteUserAction, initialState);
   const roleDescription = roleOptions.find((option) => option.value === selectedRole)?.description;
 
@@ -46,7 +41,7 @@ export function AdminInviteForm() {
     <Card className="rounded-[36px] border border-slate-100 bg-white/80 p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900/70">
       <span className="eyebrow">Invite collaborator</span>
       <h2 className="mt-3 font-display text-3xl tracking-tight text-slate-900 dark:text-white">
-        Add patients, providers, case managers, or staff
+        Add organizers, doctors, or patients
       </h2>
       <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
         Only admins can invite new workspace members. Select the role, enter the credentials, and the system
@@ -72,6 +67,10 @@ export function AdminInviteForm() {
             </Select>
           </div>
           <div className="form-field">
+            <label htmlFor="organizationName">Organization</label>
+            <Input id="organizationName" name="organizationName" placeholder="Northstar Specialty Care" />
+          </div>
+          <div className="form-field">
             <label htmlFor="fullName">Full name</label>
             <Input id="fullName" name="fullName" placeholder="Jordan Lee" />
           </div>
@@ -95,7 +94,7 @@ export function AdminInviteForm() {
           </div>
         </div>
 
-        {selectedRole === "provider" ? (
+        {selectedRole === "doctor" ? (
           <div className="grid gap-4 md:grid-cols-3">
             <div className="form-field">
               <label htmlFor="practiceName">Practice name</label>

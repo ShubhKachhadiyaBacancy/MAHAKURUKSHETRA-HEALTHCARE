@@ -7,16 +7,16 @@ import { Card } from "@/components/ui/card";
 
 const contactReasons = [
   {
-    title: "Implementation planning",
-    body: "Map onboarding, workspace setup, and initial admin provisioning before the team touches production data."
+    title: "Implementation",
+    body: "Plan onboarding, setup, and rollout before the team touches live data."
   },
   {
     title: "Access support",
-    body: "Use the public form when sign-in is blocked or the workspace has not been provisioned yet."
+    body: "Use the public form when sign-in is blocked or the workspace is not provisioned yet."
   },
   {
-    title: "Workflow questions",
-    body: "Share process gaps around intake, benefits, affordability, and readiness so the team can respond with the right handoff."
+    title: "Workflow",
+    body: "Share questions around intake, benefits, affordability, or readiness."
   }
 ];
 
@@ -41,12 +41,11 @@ export default function ContactUsPage() {
             <Card className="cta-panel overflow-hidden p-6 sm:p-8">
               <span className="eyebrow">Pre-login support</span>
               <h1 className="mt-3 max-w-2xl font-display text-5xl tracking-tight text-slate-950 sm:text-6xl">
-                Start the conversation before workspace access is live.
+                Reach the team before workspace access is live.
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">
-                Contact requests from this page are routed to a predefined
-                `@yopmail.com` inbox so the team can triage onboarding and access
-                questions outside the authenticated workspace.
+                Use the public form for onboarding and access questions outside the
+                authenticated workspace.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/login">

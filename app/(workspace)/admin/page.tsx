@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AdminInviteForm } from "@/components/features/admin/admin-invite-form";
-import { AdminModuleGrid } from "@/components/features/admin/admin-module-grid";
 import { PageIntro } from "@/components/layout/page-intro";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { modulePermissions } from "@/lib/permissions";
@@ -13,9 +11,27 @@ export const dynamic = "force-dynamic";
 
 const stats = [
   { label: "Modules tracked", value: `${modulePermissions.length}` },
-  { label: "Enforced roles", value: "5 workspace roles" },
+  { label: "Enforced roles", value: "4 workspace roles" },
   { label: "API endpoint", value: "/api/admin/modules" }
 ];
+
+function summarizePrivileges(privileges: {
+  add?: boolean;
+  edit?: boolean;
+  delete?: boolean;
+  view: boolean;
+}) {
+  if (privileges.add && privileges.edit && privileges.delete) {
+    return "Full";
+  }
+  if (privileges.add && privileges.edit) {
+    return "Manage";
+  }
+  if (privileges.view) {
+    return "View";
+  }
+  return "None";
+}
 
 export default async function AdminPage() {
   const viewer = await requireViewerContext();
@@ -37,22 +53,28 @@ export default async function AdminPage() {
       {isAdmin ? (
         <>
           <section className="section-stack">
-            <div className="grid gap-6 lg:grid-cols-[1.2fr_minmax(0,0.8fr)]">
-              <AdminModuleGrid />
-
-              <Card className="space-y-5 rounded-[32px] border border-slate-100 bg-white/80 p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/60">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
-                      Snapshot
-                    </p>
-                    <h3 className="font-display text-2xl text-slate-950 dark:text-white">
-                      Admin overview
-                    </h3>
-                  </div>
-                  <Badge tone="accent">Admin only</Badge>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
+              <Card className="space-y-4 rounded-[28px] border border-slate-100 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/60">
+                <span className="eyebrow">Quick actions</span>
+                <h2 className="font-display text-2xl text-slate-950 dark:text-white">
+                  Keep access simple
+                </h2>
+                <p className="text-sm leading-7 text-slate-600 dark:text-slate-300">
+                  Start with invites, then review the permission summary below. This is a simplified view of the
+                  RBAC matrix so you can verify access without reading dense grids.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/users">
+                    <Button>Manage users</Button>
+                  </Link>
+                  <Link href="/reports">
+                    <Button variant="secondary">Download reports</Button>
+                  </Link>
                 </div>
+              </Card>
 
+              <Card className="space-y-4 rounded-[28px] border border-slate-100 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/60">
+                <span className="eyebrow">At a glance</span>
                 <div className="grid gap-4">
                   {stats.map((stat) => (
                     <div
@@ -68,12 +90,6 @@ export default async function AdminPage() {
                     </div>
                   ))}
                 </div>
-
-                <div className="rounded-2xl bg-slate-100/70 p-4 text-xs uppercase tracking-[0.3em] text-slate-500 dark:bg-slate-900/70 dark:text-slate-300">
-                  Supabase RLS policies should mirror this matrix and guard the new{" "}
-                  <span className="font-semibold text-slate-900 dark:text-white">/api/admin/modules</span>{" "}
-                  endpoint.
-                </div>
               </Card>
             </div>
           </section>
@@ -83,10 +99,10 @@ export default async function AdminPage() {
               <div>
                 <span className="eyebrow">Invitations</span>
                 <h2 className="mt-2 font-display text-3xl tracking-tight text-slate-900 dark:text-white">
-                  Grow the workspace safely
+                  Invite new collaborators
                 </h2>
                 <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  Invite patients, providers, case managers, or staff members so each role can see the views outlined in the RBAC matrix.
+                  Invite organizers, doctors, or patients with clear, role-specific access.
                 </p>
               </div>
               <div className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
@@ -94,6 +110,55 @@ export default async function AdminPage() {
               </div>
             </div>
             <AdminInviteForm />
+          </section>
+
+          <section className="section-stack">
+            <Card className="overflow-hidden rounded-[28px] border border-slate-100 bg-white/80 dark:border-slate-800 dark:bg-slate-900/60">
+              <div className="px-6 pt-6">
+                <span className="eyebrow">Access summary</span>
+                <h2 className="mt-2 font-display text-2xl text-slate-950 dark:text-white">
+                  Permission overview
+                </h2>
+                <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                  Quick labels show each role’s access level per module.
+                </p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-slate-800">
+                  <thead>
+                    <tr className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                      <th className="px-6 py-4 font-medium">Module</th>
+                      <th className="px-6 py-4 font-medium">Admin</th>
+                      <th className="px-6 py-4 font-medium">Organizer</th>
+                      <th className="px-6 py-4 font-medium">Patients</th>
+                      <th className="px-6 py-4 font-medium">Doctor</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-900/50">
+                    {modulePermissions.map((entry) => (
+                      <tr key={entry.id}>
+                        <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">
+                          {entry.module}
+                        </td>
+                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                          {summarizePrivileges(entry.privileges.admin)}
+                        </td>
+                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                          {summarizePrivileges(entry.privileges.organizer)}
+                        </td>
+                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                          {summarizePrivileges(entry.privileges.patients)}
+                        </td>
+                        <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                          {summarizePrivileges(entry.privileges.doctor)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </section>
         </>
       ) : (

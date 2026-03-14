@@ -7,6 +7,7 @@ import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/ui/metric-card";
 import { getOrganizerReportsSnapshot } from "@/services/organizer";
+import { getAdminReportsSnapshot } from "@/services/admin-workspace";
 import { getPatientReportsSnapshot } from "@/services/patient";
 import { getReportsSnapshot } from "@/services/reports";
 import { requireViewerContext } from "@/services/viewer";
@@ -16,22 +17,53 @@ export const dynamic = "force-dynamic";
 export default async function ReportsPage() {
   const viewer = await requireViewerContext();
 
-  if (viewer.role === "admin") {
+  if (viewer.role === "organizer") {
     const snapshot = await getOrganizerReportsSnapshot();
 
     return (
       <WorkspaceShell pathname="/reports" viewer={viewer}>
         <PageIntro
-          description="Generate organization-scoped exports, inspect report history, and download the current live dataset without leaving the admin workspace."
+          description="Generate organization-scoped exports, inspect report history, and download the current live dataset without leaving the organizer workspace."
           eyebrow="Reports"
-          title="Admin reports"
+          title="Organizer reports"
         />
         <OrganizerReportsPanel snapshot={snapshot} />
       </WorkspaceShell>
     );
   }
 
-  if (viewer.role === "patient") {
+  if (viewer.role === "admin") {
+    const snapshot = await getAdminReportsSnapshot();
+
+    return (
+      <WorkspaceShell pathname="/reports" viewer={viewer}>
+        <PageIntro
+          action={
+            <Link href="/reports/export">
+              <Button>Download CSV</Button>
+            </Link>
+          }
+          description="Export system-wide reports and review cross-organization workload trends."
+          eyebrow="Reports"
+          title="Admin reports"
+        />
+        <section className="metric-grid">
+          {snapshot.metrics.map((metric) => (
+            <MetricCard
+              detail={metric.note}
+              key={metric.label}
+              label={metric.label}
+              value={metric.value}
+            />
+          ))}
+        </section>
+
+        <ReportTable snapshot={snapshot} />
+      </WorkspaceShell>
+    );
+  }
+
+  if (viewer.role === "patients") {
     const snapshot = await getPatientReportsSnapshot();
 
     return (
@@ -52,7 +84,7 @@ export default async function ReportsPage() {
   }
 
   const snapshot = await getReportsSnapshot();
-  const isDoctor = viewer.role === "provider";
+  const isDoctor = viewer.role === "doctor";
 
   return (
     <WorkspaceShell pathname="/reports" viewer={viewer}>

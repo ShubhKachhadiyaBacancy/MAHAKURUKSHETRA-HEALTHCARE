@@ -96,21 +96,26 @@ export async function bootstrapRegisteredUser({
   specialty,
   userId
 }: BootstrapRegisteredUserInput) {
-  const organization = await ensureOrganization(client, organizationName);
   const title = registerRoleDetails[role].defaultTitle;
+  const isAdmin = role === "admin";
+  const organization = isAdmin ? null : await ensureOrganization(client, organizationName);
 
   await upsertProfile(client, {
     email,
     fullName,
-    organizationId: organization.id,
+    organizationId: organization?.id ?? null,
     phone,
     role,
     title,
     userId
   });
 
+  if (isAdmin || !organization) {
+    return organization;
+  }
+
   const patientId =
-    role === "patient"
+    role === "patients"
       ? await ensureLinkedPatient(client, {
           email,
           fullName,
@@ -121,7 +126,7 @@ export async function bootstrapRegisteredUser({
       : null;
 
   const providerId =
-    role === "provider"
+    role === "doctor"
       ? await ensureLinkedProvider(client, {
           email,
           fullName,
@@ -134,7 +139,7 @@ export async function bootstrapRegisteredUser({
       : await ensureSupportProvider(client, organization.id, organization.name);
 
   const caseManagerId =
-    role === "case_manager"
+    role === "organizer"
       ? await ensureLinkedCaseManager(client, {
           email,
           fullName,
@@ -375,7 +380,49 @@ async function ensureLinkedCaseManager(
   }
 
   if (existing?.id) {
+    const { error: updateError } = await client
+      .from("case_managers")
+      .update({
+        email,
+        full_name: fullName,
+        phone: phone ?? null
+      })
+      .eq("id", existing.id);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
     return existing.id;
+  }
+
+  const { data: seededRow, error: seededRowError } = await client
+    .from("case_managers")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("email", email)
+    .maybeSingle();
+
+  if (seededRowError) {
+    throw new Error(seededRowError.message);
+  }
+
+  if (seededRow?.id) {
+    const { error: updateError } = await client
+      .from("case_managers")
+      .update({
+        email,
+        full_name: fullName,
+        phone: phone ?? null,
+        profile_id: userId
+      })
+      .eq("id", seededRow.id);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return seededRow.id;
   }
 
   const { data, error } = await client

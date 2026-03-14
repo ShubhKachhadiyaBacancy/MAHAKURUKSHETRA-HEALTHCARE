@@ -4,13 +4,42 @@ import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AdminDeleteButton } from "@/components/features/admin/admin-delete-button";
+import { OrganizerMedicationGrid } from "@/components/features/organizer/organizer-medication-grid";
 import { getMedicationCatalog } from "@/services/admin-workspace";
+import { getOrganizerMedicationsSnapshot } from "@/services/organizer";
 import { requireViewerContext } from "@/services/viewer";
 
 export const dynamic = "force-dynamic";
 
 export default async function MedicationsPage() {
   const viewer = await requireViewerContext();
+  if (viewer.role === "organizer") {
+    const snapshot = await getOrganizerMedicationsSnapshot();
+
+    return (
+      <WorkspaceShell pathname="/medications" viewer={viewer}>
+        <PageIntro
+          description="Review the medication catalog and see which therapies are already in use across your organization."
+          eyebrow="Medications"
+          title="Organization medications"
+        />
+        <OrganizerMedicationGrid snapshot={snapshot} />
+      </WorkspaceShell>
+    );
+  }
+
+  if (viewer.role !== "admin") {
+    return (
+      <WorkspaceShell pathname="/medications" viewer={viewer}>
+        <PageIntro
+          description="Medication management is reserved for admins and organizers."
+          eyebrow="Medications"
+          title="Access restricted"
+        />
+      </WorkspaceShell>
+    );
+  }
+
   const snapshot = await getMedicationCatalog({ query: "", page: "1" });
 
   return (

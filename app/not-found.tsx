@@ -11,7 +11,7 @@ export default function NotFound() {
             The page or case you requested is not available.
           </h1>
           <p className="mt-4 text-sm leading-7 text-slate-600">
-            Return to the main overview, sign in, or create the administrator account.
+            Return to the main overview, sign in, or create the organizer account.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/">

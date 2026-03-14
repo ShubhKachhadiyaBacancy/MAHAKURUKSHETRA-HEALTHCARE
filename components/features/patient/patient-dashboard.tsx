@@ -88,7 +88,7 @@ export function PatientDashboard({ snapshot }: PatientDashboardProps) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-left">
+          <table className="workspace-table min-w-full divide-y divide-slate-200 text-left">
             <thead>
               <tr className="text-xs uppercase tracking-[0.24em] text-slate-500">
                 <th className="px-6 py-4 font-medium">Claim</th>

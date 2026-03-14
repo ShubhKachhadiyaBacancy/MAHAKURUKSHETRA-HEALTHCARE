@@ -295,6 +295,37 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["organizations"]["Insert"]>;
       };
+      offices: {
+        Row: {
+          address_line_1: string | null;
+          address_line_2: string | null;
+          city: string | null;
+          created_at: string;
+          email: string | null;
+          id: string;
+          name: string;
+          organization_id: string;
+          phone: string | null;
+          state: string | null;
+          updated_at: string;
+          zip_code: string | null;
+        };
+        Insert: {
+          address_line_1?: string | null;
+          address_line_2?: string | null;
+          city?: string | null;
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          name: string;
+          organization_id: string;
+          phone?: string | null;
+          state?: string | null;
+          updated_at?: string;
+          zip_code?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["offices"]["Insert"]>;
+      };
       patient_cases: {
         Row: {
           barrier_summary: string | null;
@@ -469,7 +500,7 @@ export type Database = {
           id: string;
           organization_id: string | null;
           phone: string | null;
-          role: "admin" | "patient" | "provider" | "case_manager" | "staff";
+          role: "admin" | "organizer" | "patients" | "doctor";
           title: string | null;
           updated_at: string;
         };
@@ -480,7 +511,7 @@ export type Database = {
           id: string;
           organization_id?: string | null;
           phone?: string | null;
-          role?: "admin" | "patient" | "provider" | "case_manager" | "staff";
+          role?: "admin" | "organizer" | "patients" | "doctor";
           title?: string | null;
           updated_at?: string;
         };

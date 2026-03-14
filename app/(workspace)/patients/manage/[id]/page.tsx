@@ -28,11 +28,11 @@ export default async function OrganizerPatientDetailPage({
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
 
-  if (viewer.role !== "admin") {
+  if (viewer.role !== "organizer") {
     return (
       <WorkspaceShell pathname="/patients" viewer={viewer}>
         <Card className="p-6 text-sm text-slate-600 dark:text-slate-300">
-          Organizer patient management is only available to organization administrators.
+          Organizer patient management is only available to organizers.
         </Card>
       </WorkspaceShell>
     );

@@ -15,18 +15,25 @@ export function MetricCard({
   detail,
   tone = "default"
 }: MetricCardProps) {
+  const toneLabel =
+    tone === "critical"
+      ? "Critical"
+      : tone === "warning"
+        ? "Attention"
+        : tone === "accent"
+          ? "Opportunity"
+          : "Stable";
+
   return (
-    <Card className="p-5">
+    <Card className="metric-card p-5">
       <div className="flex items-start justify-between gap-3">
-        <span className="text-xs uppercase tracking-[0.28em] text-slate-500">
+        <span className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
           {label}
         </span>
-        <Badge tone={tone}>{tone}</Badge>
+        <Badge tone={tone}>{toneLabel}</Badge>
       </div>
-      <div className={cn("mt-5 font-display text-4xl tracking-tight text-slate-950")}>
-        {value}
-      </div>
-      <p className="mt-3 text-sm leading-7 text-slate-600">{detail}</p>
+      <div className={cn("metric-card__value")}>{value}</div>
+      <p className="metric-card__detail">{detail}</p>
     </Card>
   );
 }
